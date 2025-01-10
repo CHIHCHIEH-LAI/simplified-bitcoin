@@ -1,1 +1,1 @@
-# simplified-bitcoin
+# Simplified BitCoin
