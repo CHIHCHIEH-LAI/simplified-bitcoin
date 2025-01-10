@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"time"
 )
 
 type Block struct {
@@ -29,7 +30,7 @@ func NewGenesisBlock() Block {
 func NewBlock(index int, transactions []Transaction, prevHash string) Block {
 	block := Block{
 		Index:        index,
-		Timestamp:    "2021-01-01",
+		Timestamp:    time.Now().String(),
 		Transactions: transactions,
 		PrevHash:     prevHash,
 		Hash:         "",
