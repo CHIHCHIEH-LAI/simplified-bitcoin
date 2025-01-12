@@ -1,33 +1,48 @@
 package main
 
 import (
-	"flag"
+	"fmt"
 	"log"
-	"os"
+
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/database"
 )
 
 func main() {
-	nodeType := flag.String("type", "", "Type of process: 'node' or 'wallet'")
-	port := flag.String("port", "", "Port to run the node(only for node process)")
-	flag.Parse()
-
-	if *nodeType == "" {
-		log.Println("Please specify the type of process to run")
-		flag.Usage()
-		os.Exit(1)
+	// Open the key-value store database
+	kvStore, err := database.OpenKVStore("bitcoin.db")
+	if err != nil {
+		log.Fatalf("Failed to open database: %v", err)
 	}
+	defer kvStore.Close()
 
-	switch *nodeType {
-	case "node":
-		if *port == "" {
-			log.Println("Please specify the port to run the node")
-			flag.Usage()
-			os.Exit(1)
+	// User menu
+	for {
+		fmt.Println("\n=== Blockchain Menu ===")
+		fmt.Println("1. View blockchain")
+		fmt.Println("2. Create a wallet")
+		fmt.Println("3. Add a transaction")
+		fmt.Println("4. Mine a block")
+		fmt.Println("5. Exit")
+		fmt.Print("Enter your choice: ")
+
+		var choice int
+		_, err := fmt.Scan(&choice)
+		fmt.Println("")
+		if err != nil {
+			fmt.Println("3. View blockchain")
+			continue
 		}
-	case "wallet":
-	default:
-		log.Println("Invalid process type. Use 'node' or 'wallet'")
-		flag.Usage()
-		os.Exit(1)
+
+		switch choice {
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+			fmt.Println("Goodbye!")
+			return
+		default:
+			fmt.Println("Invalid choice. Please try again.")
+		}
 	}
 }
