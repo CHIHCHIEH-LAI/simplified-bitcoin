@@ -24,6 +24,7 @@ func (kv *KVStore) CreateBucketIfNotExists(bucketName string) error {
 	return kv.db.Update(fn)
 }
 
+// Put inserts a key-value pair into the bucket
 func (kv *KVStore) Put(bucketName string, key, value []byte) error {
 	fn := func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket([]byte(bucketName))
@@ -32,6 +33,7 @@ func (kv *KVStore) Put(bucketName string, key, value []byte) error {
 	return kv.db.Update(fn)
 }
 
+// Get retrieves a value from the bucket by key
 func (kv *KVStore) Get(bucketName string, key []byte) ([]byte, error) {
 	var value []byte
 	fn := func(tx *bbolt.Tx) error {
@@ -43,6 +45,7 @@ func (kv *KVStore) Get(bucketName string, key []byte) ([]byte, error) {
 	return value, err
 }
 
+// CloseDatabase closes the database
 func (kv *KVStore) CloseDatabase() {
 	kv.db.Close()
 }
