@@ -1,6 +1,9 @@
 package blockchain
 
-import "errors"
+import (
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/database"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/utils"
+)
 
 type Blockchain struct {
 	Blocks              []Block
@@ -9,6 +12,7 @@ type Blockchain struct {
 	MiningReward        float64
 }
 
+// NewBlockchain creates a new blockchain with the genesis block
 func NewBlockchain() Blockchain {
 	return Blockchain{
 		Blocks:              []Block{NewGenesisBlock()},
@@ -18,19 +22,34 @@ func NewBlockchain() Blockchain {
 	}
 }
 
-func (bc *Blockchain) CreateTransaction(sender string, recipient string, amount float64, timestamp string, signature string, publicKey string) error {
-	tx := Transaction{
-		Sender:    sender,
-		Recipient: recipient,
-		Amount:    amount,
-		Timestamp: timestamp,
-		Signature: signature,
+// GetLatestBlock returns the latest block in the blockchain
+func GetLatestBlock(blockchain Blockchain) Block {
+	return blockchain.Blocks[len(blockchain.Blocks)-1]
+}
+
+// AddBlock adds a block to the blockchain
+func (blockchain *Blockchain) AddBlock(block Block) {
+	blockchain.Blocks = append(blockchain.Blocks, block)
+}
+
+// SaveToDatabase saves the blockchain to the database
+func (bc *Blockchain) SaveToDatabase(kvstore *database.KVStore) error {
+	// Save the blocks
+	hashes := []string{}
+	for _, block := range bc.Blocks {
+		err := block.SaveToDatabase(kvstore)
+		if err != nil {
+			return err
+		}
+		hashes = append(hashes, block.Hash)
 	}
 
-	if !tx.IsValid(publicKey) {
-		return errors.New("invalid transaction")
+	// Serialize the block hashes
+	data, err := utils.SerializeHashes(hashes)
+	if err != nil {
+		return err
 	}
 
-	bc.PendingTransactions = append(bc.PendingTransactions, tx)
-	return nil
+	// Save the block hashes
+	return kvstore.Put("blockchain", []byte("blockchain"), data)
 }
