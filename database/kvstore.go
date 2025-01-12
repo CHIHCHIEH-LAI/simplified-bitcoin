@@ -55,6 +55,18 @@ func (kv *KVStore) Get(bucketName string, key []byte) ([]byte, error) {
 	return value, err
 }
 
+// Delete removes a key-value pair from the bucket
+func (kv *KVStore) Delete(bucketName string, key []byte) error {
+	fn := func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket([]byte(bucketName))
+		if bucket == nil {
+			return fmt.Errorf("bucket %s does not exist", bucketName)
+		}
+		return bucket.Delete(key)
+	}
+	return kv.db.Update(fn)
+}
+
 // CloseDatabase closes the database
 func (kv *KVStore) CloseDatabase() {
 	kv.db.Close()
