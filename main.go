@@ -29,7 +29,7 @@ func main() {
 		_, err := fmt.Scan(&choice)
 		fmt.Println("")
 		if err != nil {
-			fmt.Println("3. View blockchain")
+			fmt.Println("Invalid choice. Please try again.")
 			continue
 		}
 
