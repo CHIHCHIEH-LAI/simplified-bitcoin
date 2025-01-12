@@ -4,9 +4,11 @@ import (
 	"crypto/ecdsa"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"math/big"
 
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/database"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/utils"
 )
 
@@ -65,4 +67,31 @@ func (tx *Transaction) Verify(publicKey *ecdsa.PublicKey) bool {
 
 	// Verify the signature
 	return ecdsa.Verify(publicKey, []byte(hash), &r, &s)
+}
+
+// SaveToDatabase saves the transaction to the database
+func (tx *Transaction) SaveToDatabase(kvstore *database.KVStore) error {
+	data, err := tx.Serialize()
+	if err != nil {
+		return err
+	}
+
+	key := []byte(tx.Signature)
+	return kvstore.Put(tx.CalculateHash(), key, data)
+}
+
+// Serialize serializes the transaction into a byte slice
+func (tx *Transaction) Serialize() ([]byte, error) {
+	data, err := json.Marshal(tx)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+// DeserializeTransaction deserializes a transaction from a byte slice
+func DeserializeTransaction(data []byte) (Transaction, error) {
+	var tx Transaction
+	err := json.Unmarshal(data, &tx)
+	return tx, err
 }
