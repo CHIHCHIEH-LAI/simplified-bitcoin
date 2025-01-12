@@ -51,5 +51,5 @@ func (bc *Blockchain) SaveToDatabase(kvstore *database.KVStore) error {
 	}
 
 	// Save the block hashes
-	return kvstore.Put("blockchain", []byte("block_hashes"), data)
+	return kvstore.Put("blockchain", []byte("blockchain"), data)
 }
