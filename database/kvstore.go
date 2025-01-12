@@ -1,6 +1,10 @@
 package database
 
-import "go.etcd.io/bbolt"
+import (
+	"fmt"
+
+	"go.etcd.io/bbolt"
+)
 
 type KVStore struct {
 	db *bbolt.DB
@@ -28,6 +32,9 @@ func (kv *KVStore) CreateBucketIfNotExists(bucketName string) error {
 func (kv *KVStore) Put(bucketName string, key, value []byte) error {
 	fn := func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket([]byte(bucketName))
+		if bucket == nil {
+			return fmt.Errorf("bucket %s does not exist", bucketName)
+		}
 		return bucket.Put(key, value)
 	}
 	return kv.db.Update(fn)
@@ -38,11 +45,26 @@ func (kv *KVStore) Get(bucketName string, key []byte) ([]byte, error) {
 	var value []byte
 	fn := func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket([]byte(bucketName))
+		if bucket == nil {
+			return fmt.Errorf("bucket %s does not exist", bucketName)
+		}
 		value = bucket.Get(key)
 		return nil
 	}
 	err := kv.db.View(fn)
 	return value, err
+}
+
+// Delete removes a key-value pair from the bucket
+func (kv *KVStore) Delete(bucketName string, key []byte) error {
+	fn := func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket([]byte(bucketName))
+		if bucket == nil {
+			return fmt.Errorf("bucket %s does not exist", bucketName)
+		}
+		return bucket.Delete(key)
+	}
+	return kv.db.Update(fn)
 }
 
 // CloseDatabase closes the database
