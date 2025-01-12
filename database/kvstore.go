@@ -24,6 +24,25 @@ func (kv *KVStore) CreateBucketIfNotExists(bucketName string) error {
 	return kv.db.Update(fn)
 }
 
+func (kv *KVStore) Put(bucketName string, key, value []byte) error {
+	fn := func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket([]byte(bucketName))
+		return bucket.Put(key, value)
+	}
+	return kv.db.Update(fn)
+}
+
+func (kv *KVStore) Get(bucketName string, key []byte) ([]byte, error) {
+	var value []byte
+	fn := func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket([]byte(bucketName))
+		value = bucket.Get(key)
+		return nil
+	}
+	err := kv.db.View(fn)
+	return value, err
+}
+
 func (kv *KVStore) CloseDatabase() {
 	kv.db.Close()
 }
