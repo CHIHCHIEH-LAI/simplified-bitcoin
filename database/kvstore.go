@@ -10,8 +10,8 @@ type KVStore struct {
 	db *bbolt.DB
 }
 
-// OpenDatabase opens or creates a database file
-func OpenDatabase(filename string) (*KVStore, error) {
+// OpenKVStore opens or creates a key-value store database file
+func OpenKVStore(filename string) (*KVStore, error) {
 	db, err := bbolt.Open(filename, 0600, nil)
 	if err != nil {
 		return nil, err
@@ -68,6 +68,6 @@ func (kv *KVStore) Delete(bucketName string, key []byte) error {
 }
 
 // CloseDatabase closes the database
-func (kv *KVStore) CloseDatabase() {
+func (kv *KVStore) Close() {
 	kv.db.Close()
 }
