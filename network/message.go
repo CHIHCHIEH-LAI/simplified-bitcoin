@@ -22,8 +22,8 @@ func NewMessage(messageType, sender, payload string) *Message {
 }
 
 // Serialize serializes the message into a string
-func (m *Message) Serialize() string {
-	return fmt.Sprintf("%s|%s|%s", m.Type, m.Sender, m.Payload)
+func (msg *Message) Serialize() string {
+	return fmt.Sprintf("%s|%s|%s", msg.Type, msg.Sender, msg.Payload)
 }
 
 // DeserializeMessage deserializes the message from a string
