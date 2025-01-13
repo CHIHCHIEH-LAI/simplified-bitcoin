@@ -1,48 +1,69 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
+	"os"
 
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/database"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
 )
 
+// Flags
+var (
+	mode            string // Mode: "start" or "send"
+	port            string // Port to start the server
+	bitcoin_address string // Bitcoin address of the node
+	target          string // Target node address (for send mode)
+	message         string // Message to send (for send mode)
+)
+
+func init() {
+	// Define command-line flags
+	flag.StringVar(&mode, "mode", "", "Mode to run the program in: 'start' or 'send'")
+	flag.StringVar(&port, "port", "8080", "Port for the node to listen on (used in 'start' mode)")
+	flag.StringVar(&bitcoin_address, "bitcoin_address", "", "Bitcoin address of the node")
+	flag.StringVar(&target, "target", "", "Target node address to send the message to (used in 'send' mode)")
+	flag.StringVar(&message, "message", "", "Message to send to the target node (used in 'send' mode')")
+}
+
 func main() {
-	// Open the key-value store database
-	kvStore, err := database.OpenKVStore("bitcoin.db")
-	if err != nil {
-		log.Fatalf("Failed to open database: %v", err)
+	// Parse the flags
+	flag.Parse()
+
+	// Validate mode
+	if mode == "" {
+		fmt.Println("Error: Mode is required. Use '-mode=start' or '-mode=send'.")
+		flag.Usage()
+		os.Exit(1)
 	}
-	defer kvStore.Close()
 
-	// User menu
-	for {
-		fmt.Println("\n=== Blockchain Menu ===")
-		fmt.Println("1. View blockchain")
-		fmt.Println("2. Create a wallet")
-		fmt.Println("3. Add a transaction")
-		fmt.Println("4. Mine a block")
-		fmt.Println("5. Exit")
-		fmt.Print("Enter your choice: ")
-
-		var choice int
-		_, err := fmt.Scan(&choice)
-		fmt.Println("")
+	// Run based on the mode
+	switch mode {
+	case "start":
+		// Start the node server
+		err := network.StartListener(port)
 		if err != nil {
-			fmt.Println("Invalid choice. Please try again.")
-			continue
+			log.Printf("Failed to start node: %v\n", err)
+			os.Exit(1)
+		}
+	case "send":
+		// Validate required flags for send mode
+		if target == "" || message == "" {
+			log.Println("Error: Both '-target' and '-message' are required for 'send' mode.")
+			flag.Usage()
+			os.Exit(1)
 		}
 
-		switch choice {
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-			fmt.Println("Goodbye!")
-			return
-		default:
-			fmt.Println("Invalid choice. Please try again.")
+		// Send the message to the target node
+		err := network.SendMessage(target, message)
+		if err != nil {
+			log.Printf("Failed to send message: %v\n", err)
+			os.Exit(1)
 		}
+	default:
+		log.Println("Error: Invalid mode. Use '-mode=start' or '-mode=send'.")
+		flag.Usage()
+		os.Exit(1)
 	}
 }
