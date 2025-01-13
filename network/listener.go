@@ -7,7 +7,7 @@ import (
 )
 
 // StartListener starts a TCP server and listens for incoming connections
-func StartListener(port string) error {
+func StartListener(port string, msgQueue []string) error {
 	// Start listening on the specified port
 	listener, err := net.Listen("tcp", ":"+port)
 	if err != nil {
@@ -24,14 +24,13 @@ func StartListener(port string) error {
 			continue
 		}
 
-		// TODO: Handle the connection in a separate goroutine
 		// Handle the connection (blocking call)
-		handleConnection(conn)
+		handleConnection(conn, msgQueue)
 	}
 }
 
 // handleConnection handles incoming connections
-func handleConnection(conn net.Conn) {
+func handleConnection(conn net.Conn, msgQueue []string) {
 	defer conn.Close()
 
 	// Read data from the connection
@@ -44,5 +43,5 @@ func handleConnection(conn net.Conn) {
 
 	// Print the received message
 	message := string(buffer[:n])
-	log.Printf("Received message: %s\n", message)
+	msgQueue = append(msgQueue, message)
 }
