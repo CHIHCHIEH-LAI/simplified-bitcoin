@@ -10,7 +10,8 @@ import (
 
 // IntroduceSelfToGroup sends a JOINREQ message to the bootstrap node
 func (node *Node) IntroduceSelfToGroup(bootstrapNodeAddress string) error {
-	message := message.NewMessage("JOINREQ", node.Address, "")
+	// Create a JOINREQ message and serialize it
+	message := message.NewJOINREQMessage(node.Address)
 	messageData := message.Serialize()
 
 	// Send JOINREQ message to bootstrap node
