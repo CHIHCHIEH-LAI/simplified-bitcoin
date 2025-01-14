@@ -1,53 +1,47 @@
 package p2p
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
 )
 
-type P2PNode struct {
-	BitcoinAddress    string   // Bitcoin address of the node
-	Address           string   // IP address of the node
-	MemberList        []Member // List of members in the network
-	MemberListSelfPos int      // Position of the node in the member list
-	MsgQueue          []string // Message queue for the node
+type Node struct {
+	Address           string      // IP address of the node
+	MemberList        []Member    // List of members in the network
+	MemberListSelfPos int         // Position of the node in the member list
+	MessageChannel    chan string // Channel to send and receive messages
 }
 
-// NewP2PNode creates a new P2P node
-func NewP2PNode(bitcoinAddress, address string) *P2PNode {
-	return &P2PNode{
-		BitcoinAddress:    bitcoinAddress,
+// NewNode creates a new P2P node
+func NewNode(address string) *Node {
+	return &Node{
 		Address:           address,
 		MemberList:        []Member{},
 		MemberListSelfPos: -1,
+		MessageChannel:    make(chan string, 100),
 	}
 }
 
-// Start starts the P2P node
-func (node *P2PNode) Start(port string, bootstrapNodeAddress string) error {
+// Run starts the P2P node
+func (node *Node) Run(port string, bootstrapNodeAddress string) error {
+	// Run the communication listener
+	go func() {
+		err := network.RunListener(port, node.MessageChannel)
+		if err != nil {
+			log.Fatalf("Failed to start listener on port %s: %v", port, err)
+		}
+	}()
+	log.Printf("Node started on port %s\n", port)
+
+	// Introduce self to the p2p group via the bootstrap node
 	err := node.IntroduceSelfToGroup(bootstrapNodeAddress)
 	if err != nil {
-		return fmt.Errorf("failed to introduce self to group: %v", err)
+		log.Printf("Failed to join network via bootstrap node %s: %v", bootstrapNodeAddress, err)
 	}
 
-	err = network.StartListener(port, node.MsgQueue)
-	if err != nil {
-		return fmt.Errorf("failed to start listener: %v", err)
-	}
+	// Start processing messages
+	// node.HandleMessage()
 
 	return nil
-}
-
-func (node *P2PNode) HandleMessageFromQueue() {
-	if len(node.MsgQueue) == 0 {
-		return
-	}
-
-	// Pop the first message from the queue
-	// message := node.MsgQueue[0]
-	// node.MsgQueue = node.MsgQueue[1:]
-
-	// Handle the message
-
 }
