@@ -1,4 +1,4 @@
-package network
+package communication
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 )
 
 // StartListener starts a TCP server and listens for incoming connections
-func StartListener(port string, messageChannel chan<- string) error {
+func RunListener(port string, messageChannel chan<- string) error {
 	// Start listening on the specified port
 	listener, err := net.Listen("tcp", ":"+port)
 	if err != nil {
@@ -25,12 +25,12 @@ func StartListener(port string, messageChannel chan<- string) error {
 		}
 
 		// Handle the connection in a separate goroutine
-		go handleConnection(conn, messageChannel)
+		go HandleConnection(conn, messageChannel)
 	}
 }
 
 // handleConnection handles incoming connections
-func handleConnection(conn net.Conn, messageChannel chan<- string) {
+func HandleConnection(conn net.Conn, messageChannel chan<- string) {
 	defer conn.Close()
 
 	// Read data from the connection
