@@ -44,6 +44,9 @@ func (node *Node) Run(port string, bootstrapNodeAddress string) error {
 	// Start processing messages
 	go node.HandleMessage()
 
+	// Start sending heartbeats
+	go node.SendHeartbeat()
+
 	return nil
 }
 
@@ -61,12 +64,12 @@ func (node *Node) HandleMessage() {
 
 		// Process the message based on its type
 		switch {
-		// case msg.Type == "JOINREQ":
-		// 	node.HandleJoinRequest(msg)
-		// case msg.Type == "JOINRESP":
-		// 	node.HandleJoinResponse(msg)
-		// case msg.Type == "HEARTBEAT":
-		// 	node.HandleHeartbeat(msg)
+		case msg.Type == "JOINREQ":
+			node.HandleJoinRequest(msg)
+		case msg.Type == "JOINRESP":
+			node.HandleJoinResponse(msg)
+		case msg.Type == "HEARTBEAT":
+			node.HandleHeartbeat(msg)
 		// case msg.Type == "NEWBLOCK":
 		// 	node.HandleNewBlock(msg)
 		// case msg.Type == "NEWTRANSACTION":
