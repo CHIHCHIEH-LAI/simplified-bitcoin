@@ -184,9 +184,11 @@ func (node *Node) MaintainMembership() {
 	for {
 		node.UpdateSelfInMemberList()
 
-		node.SendHeartbeat()
-		time.Sleep(5 * time.Second)
+		node.RemoveFailedNodes()
 
+		node.SendHeartbeat()
+
+		time.Sleep(5 * time.Second)
 	}
 }
 
@@ -203,6 +205,15 @@ func (node *Node) UpdateSelfInMemberList() {
 	} else {
 		node.MemberList[index].Heartbeat++
 		node.MemberList[index].Timestamp = time.Now().Unix()
+	}
+}
+
+// RemoveFailedNodes removes failed nodes from the member list
+func (node *Node) RemoveFailedNodes() {
+	for i, member := range node.MemberList {
+		if time.Now().Unix()-member.Timestamp > TIMENODEREMOVE {
+			node.MemberList = append(node.MemberList[:i], node.MemberList[i+1:]...)
+		}
 	}
 }
 
