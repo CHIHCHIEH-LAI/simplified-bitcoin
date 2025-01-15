@@ -44,8 +44,8 @@ func (node *Node) Run(port string, bootstrapNodeAddress string) error {
 	// Start processing messages
 	go node.HandleMessage()
 
-	// Start sending heartbeats
-	go node.SendHeartbeat()
+	// Start maintaining membership
+	go node.MaintainMembership()
 
 	return nil
 }
