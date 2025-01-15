@@ -8,19 +8,17 @@ import (
 )
 
 type Node struct {
-	Address           string      // IP address of the node
-	MemberList        []Member    // List of members in the network
-	MemberListSelfPos int         // Position of the node in the member list
-	MessageChannel    chan string // Channel to send and receive messages
+	Address        string      // IP address of the node
+	MemberList     []Member    // List of members in the network
+	MessageChannel chan string // Channel to send and receive messages
 }
 
 // NewNode creates a new P2P node
 func NewNode(address string) *Node {
 	return &Node{
-		Address:           address,
-		MemberList:        []Member{},
-		MemberListSelfPos: -1,
-		MessageChannel:    make(chan string, 100),
+		Address:        address,
+		MemberList:     []Member{},
+		MessageChannel: make(chan string, 100),
 	}
 }
 
