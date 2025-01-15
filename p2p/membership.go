@@ -149,7 +149,6 @@ func (node *Node) UpdateMemberList(newMemberList []Member) {
 		} else {
 			node.UpdateMemberInList(index, newMember)
 		}
-
 	}
 }
 
