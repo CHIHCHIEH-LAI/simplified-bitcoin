@@ -14,7 +14,6 @@ func RunListener(port string, messageChannel chan<- string) error {
 		return fmt.Errorf("failed to start server on port %s: %v", port, err)
 	}
 	defer listener.Close()
-	log.Printf("Server started on port %s\n", port)
 
 	for {
 		// Accept a single connection
