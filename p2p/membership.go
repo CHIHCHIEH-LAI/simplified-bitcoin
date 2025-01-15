@@ -182,8 +182,27 @@ func (node *Node) UpdateMemberInList(index int, newMember Member) {
 // MaintainMembership maintains the membership list by sending heartbeats
 func (node *Node) MaintainMembership() {
 	for {
+		node.UpdateSelfInMemberList()
+
 		node.SendHeartbeat()
 		time.Sleep(5 * time.Second)
+
+	}
+}
+
+// UpdateSelfInMemberList updates the self member in the member list
+func (node *Node) UpdateSelfInMemberList() {
+	index := node.FindMemberInList(node.Address)
+	if index == -1 {
+		member := Member{
+			Address:   node.Address,
+			Heartbeat: 0,
+			Timestamp: time.Now().Unix(),
+		}
+		node.AddMemberToList(member)
+	} else {
+		node.MemberList[index].Heartbeat++
+		node.MemberList[index].Timestamp = time.Now().Unix()
 	}
 }
 
