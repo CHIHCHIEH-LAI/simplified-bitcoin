@@ -8,15 +8,6 @@ type Message struct {
 	Payload string `json:"payload"` // Payload of the message (as JSON string)
 }
 
-// NewMessage creates a new message
-func NewMessage(messageType, sender, payload string) *Message {
-	return &Message{
-		Type:    messageType,
-		Sender:  sender,
-		Payload: payload,
-	}
-}
-
 // Serialize serializes the message into a string
 func (msg *Message) Serialize() string {
 	return fmt.Sprintf("%s|%s|%s", msg.Type, msg.Sender, msg.Payload)
