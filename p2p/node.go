@@ -31,12 +31,13 @@ func (node *Node) Run(port string, bootstrapNodeAddress string) error {
 			log.Fatalf("Failed to start listener on port %s: %v", port, err)
 		}
 	}()
-	log.Printf("Node started on port %s\n", port)
 
 	// Introduce self to the p2p group via the bootstrap node
-	err := node.IntroduceSelfToGroup(bootstrapNodeAddress)
-	if err != nil {
-		log.Printf("Failed to join network via bootstrap node %s: %v", bootstrapNodeAddress, err)
+	if bootstrapNodeAddress != "" && node.Address != bootstrapNodeAddress {
+		err := node.IntroduceSelfToGroup(bootstrapNodeAddress)
+		if err != nil {
+			log.Printf("Failed to join network via bootstrap node %s: %v", bootstrapNodeAddress, err)
+		}
 	}
 
 	// Start processing messages
