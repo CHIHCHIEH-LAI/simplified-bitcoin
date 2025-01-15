@@ -73,21 +73,6 @@ func DeserializeMemberList(str string) ([]Member, error) {
 	return memberList, nil
 }
 
-// IntroduceSelfToGroup sends a JOINREQ message to the bootstrap node
-func (node *Node) IntroduceSelfToGroup(bootstrapNodeAddress string) error {
-	// Create a JOINREQ message and serialize it
-	message := NewJOINREQMessage(node.Address)
-	messageData := message.Serialize()
-
-	// Send JOINREQ message to bootstrap node
-	err := network.SendMessageData(bootstrapNodeAddress, messageData)
-	if err != nil {
-		return fmt.Errorf("failed to send JOINREQ message: %v", err)
-	}
-
-	return nil
-}
-
 // HandleJoinRequest processes a JOINREQ message
 func (node *Node) HandleJoinRequest(msg message.Message) {
 	// Add the sender to the member list
@@ -177,6 +162,21 @@ func (node *Node) UpdateMemberInList(index int, newMember Member) {
 	// Update the member in the list
 	node.MemberList[index].Heartbeat = newMember.Heartbeat
 	node.MemberList[index].Timestamp = time.Now().Unix()
+}
+
+// IntroduceSelfToGroup sends a JOINREQ message to the bootstrap node
+func (node *Node) IntroduceSelfToGroup(bootstrapNodeAddress string) error {
+	// Create a JOINREQ message and serialize it
+	message := NewJOINREQMessage(node.Address)
+	messageData := message.Serialize()
+
+	// Send JOINREQ message to bootstrap node
+	err := network.SendMessageData(bootstrapNodeAddress, messageData)
+	if err != nil {
+		return fmt.Errorf("failed to send JOINREQ message: %v", err)
+	}
+
+	return nil
 }
 
 // MaintainMembership maintains the membership list by sending heartbeats
