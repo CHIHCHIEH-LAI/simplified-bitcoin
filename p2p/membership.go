@@ -183,11 +183,8 @@ func (node *Node) UpdateMemberInList(index int, newMember Member) {
 func (node *Node) MaintainMembership() {
 	for {
 		node.UpdateSelfInMemberList()
-
 		node.RemoveFailedNodes()
-
 		node.SendHeartbeat()
-
 		time.Sleep(5 * time.Second)
 	}
 }
