@@ -11,7 +11,8 @@ import (
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
 )
 
-const TIMENODEFAIL = 1 * 60
+const TIMEMAINMEMBERSHIP = 60
+const TIMENODEFAIL = 5 * TIMEMAINMEMBERSHIP
 const TIMENODEREMOVE = 4 * TIMENODEFAIL
 
 type Member struct {
@@ -211,7 +212,7 @@ func (node *Node) MaintainMembership() {
 		node.UpdateSelfInMemberList()
 		node.RemoveFailedNodes()
 		node.SendHeartbeat()
-		time.Sleep(5 * time.Second)
+		time.Sleep(TIMEMAINMEMBERSHIP * time.Second)
 	}
 }
 
