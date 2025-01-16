@@ -2,6 +2,7 @@ package p2p
 
 import (
 	"log"
+	"time"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
@@ -32,12 +33,16 @@ func (node *Node) Run(port string, bootstrapNodeAddress string) error {
 		}
 	}()
 
-	// Introduce self to the p2p group via the bootstrap node
-	if bootstrapNodeAddress != "" && node.Address != bootstrapNodeAddress {
-		err := node.IntroduceSelfToGroup(bootstrapNodeAddress)
+	// Join the p2p network
+	if bootstrapNodeAddress == "" {
+		bootstrapNodeAddress = node.Address
+	}
+	for len(node.MemberList) == 0 {
+		err := node.JoinGroup(bootstrapNodeAddress)
 		if err != nil {
 			log.Printf("Failed to join network via bootstrap node %s: %v", bootstrapNodeAddress, err)
 		}
+		time.Sleep(5 * time.Second)
 	}
 
 	// Start processing messages
