@@ -7,14 +7,13 @@ import (
 )
 
 // StartListener starts a TCP server and listens for incoming connections
-func StartListener(port string) error {
+func RunListener(port string, messageChannel chan<- string) error {
 	// Start listening on the specified port
 	listener, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		return fmt.Errorf("failed to start server on port %s: %v", port, err)
 	}
 	defer listener.Close()
-	log.Printf("Server started on port %s\n", port)
 
 	for {
 		// Accept a single connection
@@ -24,25 +23,25 @@ func StartListener(port string) error {
 			continue
 		}
 
-		// TODO: Handle the connection in a separate goroutine
-		// Handle the connection (blocking call)
-		handleConnection(conn)
+		// Handle the connection in a separate goroutine
+		go HandleConnection(conn, messageChannel)
 	}
 }
 
 // handleConnection handles incoming connections
-func handleConnection(conn net.Conn) {
+func HandleConnection(conn net.Conn, messageChannel chan<- string) {
 	defer conn.Close()
 
 	// Read data from the connection
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, 4096)
 	n, err := conn.Read(buffer)
 	if err != nil {
 		log.Printf("Failed to read from connection: %v\n", err)
 		return
 	}
 
-	// Print the received message
-	message := string(buffer[:n])
-	log.Printf("Received message: %s\n", message)
+	// Deserialize the received message data
+	data := string(buffer[:n])
+	messageChannel <- data
+	log.Printf("Message data passed to handler: %+v\n", data)
 }
