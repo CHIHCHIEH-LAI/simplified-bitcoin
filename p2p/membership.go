@@ -176,7 +176,7 @@ func (node *Node) UpdateMemberInList(index int, newMember Member) {
 // JoinGroup joins the P2P group via the bootstrap node
 func (node *Node) JoinGroup(bootstrapNodeAddress string) error {
 	// Introduce self to the group if bootstrap node is self
-	if bootstrapNodeAddress == node.Address {
+	if bootstrapNodeAddress == "" || bootstrapNodeAddress == node.Address {
 		node.IntroduceSelfToGroup()
 		return nil
 	}
