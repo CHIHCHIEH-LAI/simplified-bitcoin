@@ -36,6 +36,7 @@ func (node *Node) Run(port string, bootstrapNodeAddress string) error {
 	err := node.JoinGroup(bootstrapNodeAddress)
 	if err != nil {
 		log.Printf("Failed to join network via bootstrap node %s: %v", bootstrapNodeAddress, err)
+		return err
 	}
 
 	// Start processing messages
