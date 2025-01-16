@@ -51,7 +51,7 @@ func NewHEARTBEATMessage(sender string, payload string) message.Message {
 func SerializeMemberList(memberList []Member) string {
 	str := ""
 	for _, member := range memberList {
-		str += fmt.Sprintf("%s:%d:%d,", member.Address, member.Heartbeat, member.Timestamp)
+		str += fmt.Sprintf("%s;%d;%d,", member.Address, member.Heartbeat, member.Timestamp)
 	}
 	return str
 }
@@ -65,7 +65,7 @@ func DeserializeMemberList(str string) ([]Member, error) {
 			continue
 		}
 		var member Member
-		parts := strings.Split(memberStr, ":")
+		parts := strings.Split(memberStr, ";")
 		if len(parts) != 3 {
 			return nil, fmt.Errorf("invalid member format")
 		}
