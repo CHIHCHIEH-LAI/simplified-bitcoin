@@ -3,6 +3,7 @@ package p2p
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
 )
 
-const TIMENODEFAIL = 30 * 60
+const TIMENODEFAIL = 1 * 60
 const TIMENODEREMOVE = 4 * TIMENODEFAIL
 
 type Member struct {
@@ -64,10 +65,13 @@ func DeserializeMemberList(str string) ([]Member, error) {
 			continue
 		}
 		var member Member
-		_, err := fmt.Sscanf(memberStr, "%s:%d:%d", &member.Address, &member.Heartbeat, &member.Timestamp)
-		if err != nil {
-			return nil, fmt.Errorf("failed to deserialize member: %v", err)
+		parts := strings.Split(memberStr, ":")
+		if len(parts) != 3 {
+			return nil, fmt.Errorf("invalid member format")
 		}
+		member.Address = parts[0]
+		member.Heartbeat, _ = strconv.ParseInt(parts[1], 10, 64)
+		member.Timestamp, _ = strconv.ParseInt(parts[2], 10, 64)
 		memberList = append(memberList, member)
 	}
 	return memberList, nil
@@ -75,6 +79,11 @@ func DeserializeMemberList(str string) ([]Member, error) {
 
 // HandleJoinRequest processes a JOINREQ message
 func (node *Node) HandleJoinRequest(msg message.Message) {
+	// Check if the sender is already in the member list
+	if index := node.FindMemberInList(msg.Sender); index != -1 {
+		return
+	}
+
 	// Add the sender to the member list
 	member := Member{
 		Address:   msg.Sender,
@@ -127,11 +136,11 @@ func (node *Node) UpdateMemberList(newMemberList []Member) {
 			continue
 		}
 
-		// Check if the member is already in the list
+		// Find the member in the list
 		index := node.FindMemberInList(newMember.Address)
-		if index == -1 {
+		if index == -1 { // Add the member if it does not exist
 			node.AddMemberToList(newMember)
-		} else {
+		} else if newMember.Heartbeat > node.MemberList[index].Heartbeat { // Update the member if the heartbeat is greater
 			node.UpdateMemberInList(index, newMember)
 		}
 	}
@@ -164,8 +173,14 @@ func (node *Node) UpdateMemberInList(index int, newMember Member) {
 	node.MemberList[index].Timestamp = time.Now().Unix()
 }
 
-// IntroduceSelfToGroup sends a JOINREQ message to the bootstrap node
-func (node *Node) IntroduceSelfToGroup(bootstrapNodeAddress string) error {
+// JoinGroup joins the P2P group via the bootstrap node
+func (node *Node) JoinGroup(bootstrapNodeAddress string) error {
+	// Introduce self to the group if bootstrap node is self
+	if bootstrapNodeAddress == node.Address {
+		node.IntroduceSelfToGroup()
+		return nil
+	}
+
 	// Create a JOINREQ message and serialize it
 	message := NewJOINREQMessage(node.Address)
 	messageData := message.Serialize()
@@ -177,6 +192,17 @@ func (node *Node) IntroduceSelfToGroup(bootstrapNodeAddress string) error {
 	}
 
 	return nil
+}
+
+// IntroduceSelfToGroup sends a JOINREQ message to the bootstrap node
+func (node *Node) IntroduceSelfToGroup() {
+	// Add self to the member list
+	member := Member{
+		Address:   node.Address,
+		Heartbeat: 0,
+		Timestamp: time.Now().Unix(),
+	}
+	node.MemberList = append(node.MemberList, member)
 }
 
 // MaintainMembership maintains the membership list by sending heartbeats
