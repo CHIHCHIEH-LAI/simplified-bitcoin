@@ -9,12 +9,11 @@ import (
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
-	"golang.org/x/exp/rand"
 )
 
-const TIMEMAINMEMBERSHIP = 60
-const TIMENODEFAIL = 5 * TIMEMAINMEMBERSHIP
-const TIMENODEREMOVE = 4 * TIMENODEFAIL
+const TIMEHEARTBEAT = 60
+const TIMENODEFAIL = 5 * TIMEHEARTBEAT
+const TIMENODEREMOVE = TIMENODEFAIL
 
 type Member struct {
 	Address   string
@@ -82,17 +81,19 @@ func DeserializeMemberList(str string) ([]Member, error) {
 // HandleJoinRequest processes a JOINREQ message
 func (node *Node) HandleJoinRequest(msg message.Message) {
 	// Check if the sender is already in the member list
-	if index := node.FindMemberInList(msg.Sender); index != -1 {
-		return
+	if index := node.FindMemberInList(msg.Sender); index == -1 {
+		// Add the sender to the member list
+		member := Member{
+			Address:   msg.Sender,
+			Heartbeat: 0,
+			Timestamp: time.Now().Unix(),
+		}
+		node.MemberList = append(node.MemberList, member)
+	} else {
+		// Update the sender's heartbeat
+		node.MemberList[index].Heartbeat = 0
+		node.MemberList[index].Timestamp = time.Now().Unix()
 	}
-
-	// Add the sender to the member list
-	member := Member{
-		Address:   msg.Sender,
-		Heartbeat: 0,
-		Timestamp: time.Now().Unix(),
-	}
-	node.MemberList = append(node.MemberList, member)
 
 	// Send JOINREP message to the sender with the current member list
 	payload := SerializeMemberList(node.MemberList)
@@ -213,7 +214,7 @@ func (node *Node) MaintainMembership() {
 		node.UpdateSelfInMemberList()
 		node.RemoveFailedNodes()
 		node.SendHeartbeat()
-		time.Sleep(TIMEMAINMEMBERSHIP * time.Second)
+		time.Sleep(TIMEHEARTBEAT * time.Second)
 	}
 }
 
@@ -244,26 +245,25 @@ func (node *Node) RemoveFailedNodes() {
 
 // SendHeartbeat sends a heartbeat message to all members in the network
 func (node *Node) SendHeartbeat() {
-	// Skip if the member list is empty
-	if len(node.MemberList) == 0 {
-		return
-	}
+
+	// Prepare the member list to be sent
+	index := node.FindMemberInList(node.Address)
+	memberListToBeSent := append([]Member{}, node.MemberList[index])
 
 	// Create a HEARTBEAT message and serialize it
-	payload := SerializeMemberList(node.MemberList)
+	payload := SerializeMemberList(memberListToBeSent)
 	message := NewHEARTBEATMessage(node.Address, payload)
 	messageData := message.Serialize()
 
-	// Send HEARTBEAT message to 10 random members in the network
-	for i := 0; i < 10; i++ {
-		index := rand.Intn(len(node.MemberList))
+	// Send HEARTBEAT message to all members in the network
+	for _, member := range node.MemberList {
 
 		// Skip self
-		if node.MemberList[index].Address == node.Address {
+		if member.Address == node.Address {
 			continue
 		}
 
-		err := network.SendMessageData(node.MemberList[index].Address, messageData)
+		err := network.SendMessageData(member.Address, messageData)
 		if err != nil {
 			log.Printf("Failed to send HEARTBEAT message: %v\n", err)
 		}
