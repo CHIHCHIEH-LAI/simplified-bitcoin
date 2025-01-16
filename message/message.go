@@ -1,6 +1,9 @@
 package message
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Message struct {
 	Type    string `json:"type"`    // Type of the message (e.g. HEARTBEAT, TRANSACTION, BLOCK, etc)
@@ -15,10 +18,15 @@ func (msg *Message) Serialize() string {
 
 // DeserializeMessage deserializes the message from a string
 func DeserializeMessage(data string) (Message, error) {
-	var msg Message
-	_, err := fmt.Sscanf(data, "%s|%s|%s", &msg.Type, &msg.Sender, &msg.Payload)
-	if err != nil {
-		return Message{}, fmt.Errorf("failed to deserialize message: %v", err)
+	parts := strings.Split(data, "|")
+	if len(parts) != 3 {
+		return Message{}, fmt.Errorf("invalid message format")
+	}
+
+	msg := Message{
+		Type:    parts[0],
+		Sender:  parts[1],
+		Payload: parts[2],
 	}
 
 	return msg, nil
