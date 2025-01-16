@@ -244,7 +244,7 @@ func (node *Node) RemoveFailedNodes() {
 func (node *Node) SendHeartbeat() {
 	// Create a HEARTBEAT message and serialize it
 	payload := SerializeMemberList(node.MemberList)
-	message := NewJOINRESPMessage(node.Address, payload)
+	message := NewHEARTBEATMessage(node.Address, payload)
 	messageData := message.Serialize()
 
 	// Send HEARTBEAT message to all members in the network
