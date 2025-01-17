@@ -65,3 +65,9 @@ func (w *Wallet) CreateTransaction(recipient string, amount float64, fee float64
 
 	return &tx, nil
 }
+
+// SendTransaction sends a transaction to a node in the network
+func SendTransaction(tx *transaction.Transaction, nodeAddress string) error {
+	// Send the transaction to the node
+	return nil
+}
