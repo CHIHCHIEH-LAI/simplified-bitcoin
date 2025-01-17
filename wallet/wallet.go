@@ -41,6 +41,7 @@ func (w *Wallet) Sign(data string) (string, error) {
 	return hex.EncodeToString(signature), nil
 }
 
+// CreateTransaction creates a new transaction
 func (w *Wallet) CreateTransaction(recipient string, amount float64, fee float64) (*transaction.Transaction, error) {
 	// Create the transaction
 	tx := transaction.Transaction{
