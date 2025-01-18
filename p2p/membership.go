@@ -42,6 +42,7 @@ func NewJOINRESPMessage(sender string, payload string) message.Message {
 // NewHEARTBEATMessage creates a new HEARTBEAT message
 func NewHEARTBEATMessage(sender string, payload string) message.Message {
 	return message.Message{
+		Type:    message.HEARTBEAT,
 		Sender:  sender,
 		Payload: payload,
 	}
