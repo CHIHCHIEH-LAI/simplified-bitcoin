@@ -14,7 +14,7 @@ TBD
 
 Run the following command to start a P2P node:
 ```
-go run ./cmd/server/main.go -port=8080 -address=127.0.0.1:8080 -bootstrap=127.0.0.1:8000
+go run main.go -port=8080 -address=127.0.0.1:8080 -bootstrap=127.0.0.1:8000
 ```
 
 Explanation of Flags
