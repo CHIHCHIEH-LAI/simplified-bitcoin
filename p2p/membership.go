@@ -15,6 +15,7 @@ import (
 const TIMEHEARTBEAT = 60
 const TIMENODEFAIL = 10 * TIMEHEARTBEAT
 const TIMENODEREMOVE = 5 * TIMENODEFAIL
+const NUMMEMBERSTOHEARTBEAT = 10
 
 type Member struct {
 	Address   string
@@ -256,16 +257,21 @@ func (node *Node) SendHeartbeat() {
 	message := NewHEARTBEATMessage(node.Address, payload)
 	messageData := message.Serialize()
 
-	// Send HEARTBEAT message to 10 random members in the network
-	for i := 0; i < min(10, len(node.MemberList)); i++ {
-		index := rand.Intn(len(node.MemberList))
+	// Choose some random members in the network
+	rand.Seed(uint64(time.Now().Unix()))
+	shuffledList := append([]Member{}, node.MemberList...)
+	rand.Shuffle(len(shuffledList), func(i, j int) {
+		shuffledList[i], shuffledList[j] = shuffledList[j], shuffledList[i]
+	})
 
+	// Send HEARTBEAT message to some random members in the network
+	for i := 0; i < min(NUMMEMBERSTOHEARTBEAT, len(node.MemberList)); i++ {
 		// Skip self
-		if node.MemberList[index].Address == node.Address {
+		if shuffledList[i].Address == node.Address {
 			continue
 		}
 
-		err := network.SendMessageData(node.MemberList[index].Address, messageData)
+		err := network.SendMessageData(shuffledList[i].Address, messageData)
 		if err != nil {
 			log.Printf("Failed to send HEARTBEAT message: %v\n", err)
 		}
