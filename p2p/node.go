@@ -62,16 +62,18 @@ func (node *Node) HandleMessage() {
 
 		// Process the message based on its type
 		switch {
-		case msg.Type == "JOINREQ":
+		case msg.Type == message.JOINREQ:
 			node.HandleJoinRequest(msg)
-		case msg.Type == "JOINRESP":
+		case msg.Type == message.JOINRESP:
 			node.HandleJoinResponse(msg)
-		case msg.Type == "HEARTBEAT":
+		case msg.Type == message.HEARTBEAT:
 			node.HandleHeartbeat(msg)
+		// case msg.Type == message.NEWTRANSACTION:
+		// 	node.HandleTransaction(msg)
+		// case msg.Type == "TRANSACTIONBROADCAST":
+		// 	node.HandleTransactionBroadcast(msg)
 		// case msg.Type == "NEWBLOCK":
 		// 	node.HandleNewBlock(msg)
-		// case msg.Type == "NEWTRANSACTION":
-		// 	node.HandleNewTransaction(msg)
 		// case msg.Type == "GETBLOCKCHAIN":
 		// 	node.HandleGetBlockchain(msg)
 		default:

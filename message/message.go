@@ -5,6 +5,14 @@ import (
 	"strings"
 )
 
+const (
+	JOINREQ              = "JOINREQ"
+	JOINRESP             = "JOINRESP"
+	HEARTBEAT            = "HEARTBEAT"
+	NEWTRANSACTION       = "NEWTRANSACTION"
+	TRANSACTIONBROADCAST = "TRANSACTIONBROADCAST"
+)
+
 type Message struct {
 	Type    string `json:"type"`    // Type of the message (e.g. HEARTBEAT, TRANSACTION, BLOCK, etc)
 	Sender  string `json:"sender"`  // Sender of the message
