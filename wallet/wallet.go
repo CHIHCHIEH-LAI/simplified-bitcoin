@@ -75,7 +75,7 @@ func SendTransaction(tx *transaction.Transaction, selfAddress string, nodeAddres
 
 	// Create and serialize the mwssage
 	message := message.Message{
-		Type:    "TRANSACTION",
+		Type:    message.NEWTRANSACTION,
 		Sender:  selfAddress,
 		Payload: txData,
 	}
