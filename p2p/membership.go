@@ -9,11 +9,12 @@ import (
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
+	"golang.org/x/exp/rand"
 )
 
 const TIMEHEARTBEAT = 60
-const TIMENODEFAIL = 5 * TIMEHEARTBEAT
-const TIMENODEREMOVE = TIMENODEFAIL
+const TIMENODEFAIL = 10 * TIMEHEARTBEAT
+const TIMENODEREMOVE = 5 * TIMENODEFAIL
 
 type Member struct {
 	Address   string
@@ -245,25 +246,26 @@ func (node *Node) RemoveFailedNodes() {
 
 // SendHeartbeat sends a heartbeat message to all members in the network
 func (node *Node) SendHeartbeat() {
-
-	// Prepare the member list to be sent
-	index := node.FindMemberInList(node.Address)
-	memberListToBeSent := append([]Member{}, node.MemberList[index])
+	// Skip if there is only one member in the network
+	if len(node.MemberList) == 1 {
+		return
+	}
 
 	// Create a HEARTBEAT message and serialize it
-	payload := SerializeMemberList(memberListToBeSent)
+	payload := SerializeMemberList(node.MemberList)
 	message := NewHEARTBEATMessage(node.Address, payload)
 	messageData := message.Serialize()
 
-	// Send HEARTBEAT message to all members in the network
-	for _, member := range node.MemberList {
+	// Send HEARTBEAT message to 10 random members in the network
+	for i := 0; i < min(10, len(node.MemberList)); i++ {
+		index := rand.Intn(len(node.MemberList))
 
 		// Skip self
-		if member.Address == node.Address {
+		if node.MemberList[index].Address == node.Address {
 			continue
 		}
 
-		err := network.SendMessageData(member.Address, messageData)
+		err := network.SendMessageData(node.MemberList[index].Address, messageData)
 		if err != nil {
 			log.Printf("Failed to send HEARTBEAT message: %v\n", err)
 		}
