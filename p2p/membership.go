@@ -24,7 +24,7 @@ type Member struct {
 // NewJOINREQMessage creates a new JOINREQ message
 func NewJOINREQMessage(sender string) message.Message {
 	return message.Message{
-		Type:    "JOINREQ",
+		Type:    message.JOINREQ,
 		Sender:  sender,
 		Payload: "",
 	}
@@ -33,7 +33,7 @@ func NewJOINREQMessage(sender string) message.Message {
 // NewJOINRESPMessage creates a new JOINRESP message
 func NewJOINRESPMessage(sender string, payload string) message.Message {
 	return message.Message{
-		Type:    "JOINRESP",
+		Type:    message.JOINRESP,
 		Sender:  sender,
 		Payload: payload,
 	}
@@ -42,7 +42,6 @@ func NewJOINRESPMessage(sender string, payload string) message.Message {
 // NewHEARTBEATMessage creates a new HEARTBEAT message
 func NewHEARTBEATMessage(sender string, payload string) message.Message {
 	return message.Message{
-		Type:    "HEARTBEAT",
 		Sender:  sender,
 		Payload: payload,
 	}
