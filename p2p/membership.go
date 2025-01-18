@@ -245,7 +245,7 @@ func (node *Node) RemoveFailedNodes() {
 	}
 }
 
-// SendHeartbeat sends a heartbeat message to all members in the network
+// SendHeartbeat sends a heartbeat message to some random members in the network
 func (node *Node) SendHeartbeat() {
 	// Skip if there is only one member in the network
 	if len(node.MemberList) == 1 {
@@ -257,23 +257,29 @@ func (node *Node) SendHeartbeat() {
 	message := NewHEARTBEATMessage(node.Address, payload)
 	messageData := message.Serialize()
 
-	// Choose some random members in the network
-	rand.Seed(uint64(time.Now().Unix()))
-	shuffledList := append([]Member{}, node.MemberList...)
-	rand.Shuffle(len(shuffledList), func(i, j int) {
-		shuffledList[i], shuffledList[j] = shuffledList[j], shuffledList[i]
-	})
-
 	// Send HEARTBEAT message to some random members in the network
-	for i := 0; i < min(NUMMEMBERSTOHEARTBEAT, len(node.MemberList)); i++ {
+	selectedMembers := make(map[int]bool)
+	limit := min(NUMMEMBERSTOHEARTBEAT, len(node.MemberList))
+
+	for len(selectedMembers) < limit {
+		index := rand.Intn(len(node.MemberList))
+
 		// Skip self
-		if shuffledList[i].Address == node.Address {
+		if node.MemberList[index].Address == node.Address {
 			continue
 		}
 
-		err := network.SendMessageData(shuffledList[i].Address, messageData)
+		// Skip if the member is already selected
+		if _, ok := selectedMembers[index]; ok {
+			continue
+		}
+
+		// Send HEARTBEAT message to the member
+		err := network.SendMessageData(node.MemberList[index].Address, messageData)
 		if err != nil {
 			log.Printf("Failed to send HEARTBEAT message: %v\n", err)
 		}
+
+		selectedMembers[index] = true
 	}
 }
