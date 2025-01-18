@@ -2,4 +2,4 @@ module github.com/CHIHCHIEH-LAI/simplified-bitcoin
 
 go 1.23.2
 
-require golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8 // indirect
+require golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8
