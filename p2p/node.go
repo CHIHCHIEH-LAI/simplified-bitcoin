@@ -70,8 +70,6 @@ func (node *Node) HandleMessage() {
 			node.HandleHeartbeat(msg)
 		// case msg.Type == message.NEWTRANSACTION:
 		// 	node.HandleTransaction(msg)
-		// case msg.Type == "TRANSACTIONBROADCAST":
-		// 	node.HandleTransactionBroadcast(msg)
 		// case msg.Type == "NEWBLOCK":
 		// 	node.HandleNewBlock(msg)
 		// case msg.Type == "GETBLOCKCHAIN":
