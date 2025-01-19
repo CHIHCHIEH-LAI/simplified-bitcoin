@@ -34,3 +34,8 @@ func NewBlock(prevHash string, transactions []*transaction.Transaction) *Block {
 	block.BlockID = block.GenerateBlockID()
 	return block
 }
+
+// NewGenesisBlock creates the first block in the blockchain
+func NewGenesisBlock() *Block {
+	return NewBlock("", nil)
+}
