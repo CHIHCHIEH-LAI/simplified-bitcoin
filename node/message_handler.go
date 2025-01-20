@@ -28,14 +28,12 @@ func (node *Node) HandleMessage() {
 			node.MembershipManager.HandleHeartbeat(msg)
 		// case message.NEWTRANSACTION:
 		// 	node.HandleNewTransaction(msg)
-		// case message.TRANSACTIONBROADCAST:
-		// 	node.HandleTransactionBroadcast(msg)
-		// case "NEWBLOCK":
+		// case message.NEWBLOCK:
 		// 	node.HandleNewBlock(msg)
 		// case "GETBLOCKCHAIN":
 		// 	node.HandleGetBlockchain(msg)
 		default:
-			log.Printf("Unknown message type: %s\n", msg)
+			log.Printf("Unknown message type: %s\n", msg.Type)
 		}
 	}
 }
