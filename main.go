@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/p2p"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/node"
 )
 
 var (
@@ -33,7 +33,7 @@ func main() {
 	}
 
 	// Create a new P2P node
-	node := p2p.NewNode(address)
+	node := node.NewNode(address)
 
 	// Start the node
 	log.Printf("Starting node at %s...\n", address)
