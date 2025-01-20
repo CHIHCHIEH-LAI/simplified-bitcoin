@@ -9,19 +9,19 @@ import (
 )
 
 type Node struct {
-	Address           string                        // IP address of the node
-	MembershipManager *membership.MembershipManager // Membership manager
-	MessageChannel    chan string                   // Channel to send and receive messages
-	TransactionPool   *transaction.TransactionPool  // Pool of transactions
+	Address            string                          // IP address of the node
+	MessageChannel     chan string                     // Channel to send and receive messages
+	MembershipManager  *membership.MembershipManager   // Membership manager
+	TransactionManager *transaction.TransactionManager // Transaction manager
 }
 
 // NewNode creates a new P2P node
 func NewNode(address string) *Node {
 	return &Node{
-		Address:           address,
-		MembershipManager: membership.NewMembershipManager(address),
-		MessageChannel:    make(chan string, 100),
-		TransactionPool:   transaction.NewTransactionPool(),
+		Address:            address,
+		MessageChannel:     make(chan string, 100),
+		MembershipManager:  membership.NewMembershipManager(address),
+		TransactionManager: transaction.NewTransactionManager(),
 	}
 }
 
