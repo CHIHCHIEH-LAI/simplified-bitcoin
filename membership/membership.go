@@ -1,4 +1,4 @@
-package p2p
+package membership
 
 import (
 	"fmt"
@@ -9,6 +9,7 @@ import (
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/utils"
 	"golang.org/x/exp/rand"
 )
 
@@ -21,6 +22,19 @@ type Member struct {
 	Address   string
 	Heartbeat int64
 	Timestamp int64
+}
+
+type MembershipManager struct {
+	Address    string
+	MemberList []Member
+}
+
+// NewMembershipManager creates a new membership manager
+func NewMembershipManager(address string) *MembershipManager {
+	return &MembershipManager{
+		Address:    address,
+		MemberList: []Member{},
+	}
 }
 
 // NewJOINREQMessage creates a new JOINREQ message
@@ -81,25 +95,25 @@ func DeserializeMemberList(str string) ([]Member, error) {
 }
 
 // HandleJoinRequest processes a JOINREQ message
-func (node *Node) HandleJoinRequest(msg message.Message) {
+func (mgr *MembershipManager) HandleJoinRequest(msg message.Message) {
 	// Check if the sender is already in the member list
-	if index := node.FindMemberInList(msg.Sender); index == -1 {
+	if index := mgr.FindMemberInList(msg.Sender); index == -1 {
 		// Add the sender to the member list
 		member := Member{
 			Address:   msg.Sender,
 			Heartbeat: 0,
-			Timestamp: time.Now().Unix(),
+			Timestamp: utils.GetCurrentTimeInUnix(),
 		}
-		node.MemberList = append(node.MemberList, member)
+		mgr.MemberList = append(mgr.MemberList, member)
 	} else {
 		// Update the sender's heartbeat
-		node.MemberList[index].Heartbeat = 0
-		node.MemberList[index].Timestamp = time.Now().Unix()
+		mgr.MemberList[index].Heartbeat = 0
+		mgr.MemberList[index].Timestamp = utils.GetCurrentTimeInUnix()
 	}
 
 	// Send JOINREP message to the sender with the current member list
-	payload := SerializeMemberList(node.MemberList)
-	message := NewJOINRESPMessage(node.Address, payload)
+	payload := SerializeMemberList(mgr.MemberList)
+	message := NewJOINRESPMessage(mgr.Address, payload)
 	messageData := message.Serialize()
 	err := network.SendMessageData(msg.Sender, messageData)
 	if err != nil {
@@ -108,7 +122,7 @@ func (node *Node) HandleJoinRequest(msg message.Message) {
 }
 
 // HandleJoinResponse processes a JOINRESP message
-func (node *Node) HandleJoinResponse(msg message.Message) {
+func (mgr *MembershipManager) HandleJoinResponse(msg message.Message) {
 	// Deserialize the member list from the payload
 	memberList, err := DeserializeMemberList(msg.Payload)
 	if err != nil {
@@ -117,11 +131,11 @@ func (node *Node) HandleJoinResponse(msg message.Message) {
 	}
 
 	// Update the member list
-	node.MemberList = memberList
+	mgr.MemberList = memberList
 }
 
 // HandleHeartbeat processes a HEARTBEAT message
-func (node *Node) HandleHeartbeat(msg message.Message) {
+func (mgr *MembershipManager) HandleHeartbeat(msg message.Message) {
 	// Deserialize the member list from the payload
 	memberList, err := DeserializeMemberList(msg.Payload)
 	if err != nil {
@@ -130,30 +144,30 @@ func (node *Node) HandleHeartbeat(msg message.Message) {
 	}
 
 	// Update the member list
-	node.UpdateMemberList(memberList)
+	mgr.UpdateMemberList(memberList)
 }
 
 // UpdateMemberList updates the member list with the new list of members
-func (node *Node) UpdateMemberList(newMemberList []Member) {
+func (mgr *MembershipManager) UpdateMemberList(newMemberList []Member) {
 	for _, newMember := range newMemberList {
 		// Check if the member is self
-		if newMember.Address == node.Address {
+		if newMember.Address == mgr.Address {
 			continue
 		}
 
 		// Find the member in the list
-		index := node.FindMemberInList(newMember.Address)
+		index := mgr.FindMemberInList(newMember.Address)
 		if index == -1 { // Add the member if it does not exist
-			node.AddMemberToList(newMember)
-		} else if newMember.Heartbeat > node.MemberList[index].Heartbeat { // Update the member if the heartbeat is greater
-			node.UpdateMemberInList(index, newMember)
+			mgr.AddMemberToList(newMember)
+		} else if newMember.Heartbeat > mgr.MemberList[index].Heartbeat { // Update the member if the heartbeat is greater
+			mgr.UpdateMemberInList(index, newMember)
 		}
 	}
 }
 
 // FindMemberInList finds a member in the list by address
-func (node *Node) FindMemberInList(address string) int {
-	for i, member := range node.MemberList {
+func (mgr *MembershipManager) FindMemberInList(address string) int {
+	for i, member := range mgr.MemberList {
 		if member.Address == address {
 			return i
 		}
@@ -162,32 +176,32 @@ func (node *Node) FindMemberInList(address string) int {
 }
 
 // AddMemberToList adds a member to the list
-func (node *Node) AddMemberToList(member Member) {
-	node.MemberList = append(node.MemberList, member)
+func (mgr *MembershipManager) AddMemberToList(member Member) {
+	mgr.MemberList = append(mgr.MemberList, member)
 }
 
 // UpdateMemberInList updates a member in the list
-func (node *Node) UpdateMemberInList(index int, newMember Member) {
+func (mgr *MembershipManager) UpdateMemberInList(index int, newMember Member) {
 	// Check if the newMember is failed
-	if time.Now().Unix()-newMember.Timestamp > TIMENODEFAIL {
+	if utils.GetCurrentTimeInUnix()-newMember.Timestamp > TIMENODEFAIL {
 		return
 	}
 
 	// Update the member in the list
-	node.MemberList[index].Heartbeat = newMember.Heartbeat
-	node.MemberList[index].Timestamp = time.Now().Unix()
+	mgr.MemberList[index].Heartbeat = newMember.Heartbeat
+	mgr.MemberList[index].Timestamp = utils.GetCurrentTimeInUnix()
 }
 
 // JoinGroup joins the P2P group via the bootstrap node
-func (node *Node) JoinGroup(bootstrapNodeAddress string) error {
+func (mgr *MembershipManager) JoinGroup(bootstrapNodeAddress string) error {
 	// Introduce self to the group if bootstrap node is self
-	if bootstrapNodeAddress == "" || bootstrapNodeAddress == node.Address {
-		node.IntroduceSelfToGroup()
+	if bootstrapNodeAddress == "" || bootstrapNodeAddress == mgr.Address {
+		mgr.IntroduceSelfToGroup()
 		return nil
 	}
 
 	// Create a JOINREQ message and serialize it
-	message := NewJOINREQMessage(node.Address)
+	message := NewJOINREQMessage(mgr.Address)
 	messageData := message.Serialize()
 
 	// Send JOINREQ message to bootstrap node
@@ -200,72 +214,72 @@ func (node *Node) JoinGroup(bootstrapNodeAddress string) error {
 }
 
 // IntroduceSelfToGroup sends a JOINREQ message to the bootstrap node
-func (node *Node) IntroduceSelfToGroup() {
+func (mgr *MembershipManager) IntroduceSelfToGroup() {
 	// Add self to the member list
 	member := Member{
-		Address:   node.Address,
+		Address:   mgr.Address,
 		Heartbeat: 0,
-		Timestamp: time.Now().Unix(),
+		Timestamp: utils.GetCurrentTimeInUnix(),
 	}
-	node.MemberList = append(node.MemberList, member)
+	mgr.MemberList = append(mgr.MemberList, member)
 }
 
 // MaintainMembership maintains the membership list by sending heartbeats
-func (node *Node) MaintainMembership() {
+func (mgr *MembershipManager) MaintainMembership() {
 	for {
-		node.UpdateSelfInMemberList()
-		node.RemoveFailedNodes()
-		node.SendHeartbeat()
+		mgr.UpdateSelfInMemberList()
+		mgr.RemoveFailedNodes()
+		mgr.SendHeartbeat()
 		time.Sleep(TIMEHEARTBEAT * time.Second)
 	}
 }
 
 // UpdateSelfInMemberList updates the self member in the member list
-func (node *Node) UpdateSelfInMemberList() {
-	index := node.FindMemberInList(node.Address)
+func (mgr *MembershipManager) UpdateSelfInMemberList() {
+	index := mgr.FindMemberInList(mgr.Address)
 	if index == -1 {
 		member := Member{
-			Address:   node.Address,
+			Address:   mgr.Address,
 			Heartbeat: 0,
-			Timestamp: time.Now().Unix(),
+			Timestamp: utils.GetCurrentTimeInUnix(),
 		}
-		node.AddMemberToList(member)
+		mgr.AddMemberToList(member)
 	} else {
-		node.MemberList[index].Heartbeat++
-		node.MemberList[index].Timestamp = time.Now().Unix()
+		mgr.MemberList[index].Heartbeat++
+		mgr.MemberList[index].Timestamp = utils.GetCurrentTimeInUnix()
 	}
 }
 
 // RemoveFailedNodes removes failed nodes from the member list
-func (node *Node) RemoveFailedNodes() {
-	for i, member := range node.MemberList {
-		if time.Now().Unix()-member.Timestamp > TIMENODEREMOVE {
-			node.MemberList = append(node.MemberList[:i], node.MemberList[i+1:]...)
+func (mgr *MembershipManager) RemoveFailedNodes() {
+	for i, member := range mgr.MemberList {
+		if utils.GetCurrentTimeInUnix()-member.Timestamp > TIMENODEREMOVE {
+			mgr.MemberList = append(mgr.MemberList[:i], mgr.MemberList[i+1:]...)
 		}
 	}
 }
 
 // SendHeartbeat sends a heartbeat message to some random members in the network
-func (node *Node) SendHeartbeat() {
+func (mgr *MembershipManager) SendHeartbeat() {
 	// Skip if there is only one member in the network
-	if len(node.MemberList) == 1 {
+	if len(mgr.MemberList) == 1 {
 		return
 	}
 
 	// Create a HEARTBEAT message and serialize it
-	payload := SerializeMemberList(node.MemberList)
-	message := NewHEARTBEATMessage(node.Address, payload)
+	payload := SerializeMemberList(mgr.MemberList)
+	message := NewHEARTBEATMessage(mgr.Address, payload)
 	messageData := message.Serialize()
 
 	// Send HEARTBEAT message to some random members in the network
 	selectedMembers := make(map[int]bool)
-	limit := min(NUMMEMBERSTOHEARTBEAT, len(node.MemberList))
+	limit := min(NUMMEMBERSTOHEARTBEAT, len(mgr.MemberList))
 
 	for len(selectedMembers) < limit {
-		index := rand.Intn(len(node.MemberList))
+		index := rand.Intn(len(mgr.MemberList))
 
 		// Skip self
-		if node.MemberList[index].Address == node.Address {
+		if mgr.MemberList[index].Address == mgr.Address {
 			continue
 		}
 
@@ -275,7 +289,7 @@ func (node *Node) SendHeartbeat() {
 		}
 
 		// Send HEARTBEAT message to the member
-		err := network.SendMessageData(node.MemberList[index].Address, messageData)
+		err := network.SendMessageData(mgr.MemberList[index].Address, messageData)
 		if err != nil {
 			log.Printf("Failed to send HEARTBEAT message: %v\n", err)
 		}
