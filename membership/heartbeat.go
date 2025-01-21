@@ -6,7 +6,6 @@ import (
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/utils"
-	"golang.org/x/exp/rand"
 )
 
 // NewHEARTBEATMessage creates a new HEARTBEAT message
@@ -44,29 +43,15 @@ func (mgr *MembershipManager) SendHeartbeat() {
 	message := NewHEARTBEATMessage(mgr.Address, payload)
 	messageData := message.Serialize()
 
+	// Select some random members to send the HEARTBEAT message
+	selectedMembers := mgr.SelectNMembers(NUMMEMBERSTOHEARTBEAT)
+
 	// Send HEARTBEAT message to some random members in the network
-	selectedMembers := make(map[int]bool)
-	limit := min(NUMMEMBERSTOHEARTBEAT, len(mgr.MemberList))
-
-	for len(selectedMembers) < limit {
-		index := rand.Intn(len(mgr.MemberList))
-
-		// Skip self
-		if mgr.MemberList[index].Address == mgr.Address {
-			continue
-		}
-
-		// Skip if the member is already selected
-		if _, ok := selectedMembers[index]; ok {
-			continue
-		}
-
+	for _, address := range selectedMembers {
 		// Send HEARTBEAT message to the member
-		err := network.SendMessageData(mgr.MemberList[index].Address, messageData)
+		err := network.SendMessageData(address, messageData)
 		if err != nil {
 			log.Printf("Failed to send HEARTBEAT message: %v\n", err)
 		}
-
-		selectedMembers[index] = true
 	}
 }
