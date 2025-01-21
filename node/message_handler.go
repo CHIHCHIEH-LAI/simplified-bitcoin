@@ -26,8 +26,8 @@ func (node *Node) HandleMessage() {
 			node.MembershipManager.HandleJoinResponse(msg)
 		case message.HEARTBEAT:
 			node.MembershipManager.HandleHeartbeat(msg)
-		// case message.NEWTRANSACTION:
-		// 	node.HandleNewTransaction(msg)
+		case message.NEWTRANSACTION:
+			node.TransactionManager.HandleNewTransaction(&msg)
 		// case message.NEWBLOCK:
 		// 	node.HandleNewBlock(msg)
 		// case "GETBLOCKCHAIN":
