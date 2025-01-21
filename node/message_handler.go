@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/transaction"
 )
 
 // HandleMessage processes incoming messages
@@ -27,7 +28,8 @@ func (node *Node) HandleMessage() {
 		case message.HEARTBEAT:
 			node.MembershipManager.HandleHeartbeat(msg)
 		case message.NEWTRANSACTION:
-			node.TransactionManager.HandleNewTransaction(&msg)
+			selectedMembers := node.MembershipManager.SelectNMembers(transaction.NUM_MEMBERS_TO_BROADCAST)
+			node.TransactionManager.HandleNewTransaction(&msg, selectedMembers)
 		// case message.NEWBLOCK:
 		// 	node.HandleNewBlock(msg)
 		// case "GETBLOCKCHAIN":
