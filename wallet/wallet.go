@@ -9,8 +9,8 @@ import (
 )
 
 type Wallet struct {
-	PrivateKey *ecdsa.PrivateKey
-	PublicKey  []byte
+	PrivateKey *ecdsa.PrivateKey `json:"-"`
+	PublicKey  []byte            `json:"public_key"`
 }
 
 // NewWallet creates and returns a Wallet
