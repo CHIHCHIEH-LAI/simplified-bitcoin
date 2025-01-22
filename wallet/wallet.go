@@ -9,8 +9,8 @@ import (
 )
 
 type Wallet struct {
-	PrivateKey *ecdsa.PrivateKey
-	PublicKey  []byte
+	PrivateKey *ecdsa.PrivateKey `json:"-"`
+	PublicKey  []byte            `json:"public_key"`
 }
 
 // NewWallet creates and returns a Wallet
@@ -18,16 +18,6 @@ func NewWallet() *Wallet {
 	privateKey, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	publicKey := append(privateKey.PublicKey.X.Bytes(), privateKey.PublicKey.Y.Bytes()...)
 	return &Wallet{privateKey, publicKey}
-}
-
-// GetPrivateKeyInString returns the private key in string format
-func (w *Wallet) GetPrivateKeyInString() string {
-	return hex.EncodeToString(w.PrivateKey.D.Bytes())
-}
-
-// GetPublicKeyInString returns the public key in string format
-func (w *Wallet) GetPublicKeyInString() string {
-	return hex.EncodeToString(w.PublicKey)
 }
 
 // GetAddress generates a public key hash (address) for the wallet
