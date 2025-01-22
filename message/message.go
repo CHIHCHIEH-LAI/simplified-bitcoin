@@ -22,7 +22,7 @@ type Message struct {
 
 // Serialize serializes the message into a string
 func (msg *Message) Serialize() string {
-	return fmt.Sprintf("%s|%s|%s,%d", msg.Type, msg.Sender, msg.Payload, msg.Timestamp)
+	return fmt.Sprintf("%s|%s|%s|%d", msg.Type, msg.Sender, msg.Payload, msg.Timestamp)
 }
 
 // DeserializeMessage deserializes the message from a string
