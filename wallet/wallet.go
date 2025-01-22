@@ -20,6 +20,16 @@ func NewWallet() *Wallet {
 	return &Wallet{privateKey, publicKey}
 }
 
+// GetPrivateKeyInString returns the private key in string format
+func (w *Wallet) GetPrivateKeyInString() string {
+	return hex.EncodeToString(w.PrivateKey.D.Bytes())
+}
+
+// GetPublicKeyInString returns the public key in string format
+func (w *Wallet) GetPublicKeyInString() string {
+	return hex.EncodeToString(w.PublicKey)
+}
+
 // GetAddress generates a public key hash (address) for the wallet
 func (w *Wallet) GetAddress() string {
 	pubHash := sha256.Sum256(w.PublicKey)
