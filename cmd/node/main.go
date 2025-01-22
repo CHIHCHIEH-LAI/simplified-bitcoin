@@ -25,6 +25,15 @@ func main() {
 	// Parse command-line flags
 	flag.Parse()
 
+	// Parse flags
+	flag.Parse()
+
+	// Start the node
+	startNode()
+}
+
+// startNode starts a new node
+func startNode() {
 	// Validate the address
 	if address == "" {
 		log.Println("Error: The node address is required. Use -address to specify it.")
