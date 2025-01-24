@@ -10,14 +10,20 @@ import (
 )
 
 var (
-	action     string // Action to perform: createWallet
-	walletFile string // Filename for saving the wallet
+	action            string // Action to perform: createWallet, createTx
+	walletFile        string // Filename for saving the wallet
+	recipient         string // Recipient address for the transaction
+	address           string // Address of the node (e.g., "127.0.0.1:8080")
+	bootstrapNodeAddr string // Address of the bootstrap node to join the network
 )
 
 func init() {
 	// Define command-line flags
-	flag.StringVar(&action, "action", "create", "Action to perform: 'createWallet'")
+	flag.StringVar(&action, "action", "create", "Action to perform: 'createWallet', 'createTx'")
 	flag.StringVar(&walletFile, "wallet", "wallet.json", "Filename for saving the wallet")
+	flag.StringVar(&recipient, "recipient", "", "Recipient address for the transaction")
+	flag.StringVar(&address, "address", "", "IP address of the node (e.g., 127.0.0.1:8080")
+	flag.StringVar(&bootstrapNodeAddr, "bootstrap", "", "Address of the bootstrap node to join the network")
 }
 
 func main() {
@@ -27,6 +33,8 @@ func main() {
 	switch action {
 	case "createWallet":
 		createWallet()
+	case "createTx":
+		createTransaction()
 	default:
 		fmt.Println("Invalid action. Use 'createWallet'")
 		flag.Usage()
@@ -46,4 +54,25 @@ func createWallet() {
 	}
 
 	fmt.Printf("Wallet saved to '%s'\n", walletFile)
+}
+
+func createTransaction() {
+	// Load the wallet from file
+	w, err := wallet.LoadFromFile(walletFile)
+	if err != nil {
+		log.Fatalf("Failed to load wallet: %v\n", err)
+	}
+
+	// Create a new transaction
+	tx, err := w.CreateTransaction(recipient, 0.01, 0.0001)
+	if err != nil {
+		log.Fatalf("Failed to create transaction: %v\n", err)
+	}
+	fmt.Printf("Transaction created!\nID: %s\n", tx.TransactionID)
+
+	// Send the transaction to the network
+	err = wallet.SendTransaction(tx, address, bootstrapNodeAddr)
+	if err != nil {
+		log.Fatalf("Failed to send transaction: %v\n", err)
+	}
 }
