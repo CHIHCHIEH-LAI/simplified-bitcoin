@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/utils"
 )
 
 type Transaction struct {
@@ -16,6 +18,23 @@ type Transaction struct {
 	Fee           float64
 	Timestamp     int64
 	Signature     string
+}
+
+// NewUnsignedTransaction creates a new unsigned transaction
+func NewUnsignedTransaction(sender, recipient string, amount, fee float64) (*Transaction, error) {
+	// Create a new transaction
+	tx := Transaction{
+		Sender:    sender,
+		Recipient: recipient,
+		Amount:    amount,
+		Fee:       fee,
+		Timestamp: utils.GetCurrentTimeInUnix(),
+	}
+
+	// Generate the transaction ID
+	tx.TransactionID = tx.GenerateTransactionID()
+
+	return &tx, nil
 }
 
 // GenerateTransactionID generates a unique ID for the transaction
