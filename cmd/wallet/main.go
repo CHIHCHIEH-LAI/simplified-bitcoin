@@ -10,9 +10,11 @@ import (
 )
 
 var (
-	action     string // Action to perform: createWallet, createTx
-	walletFile string // Filename for saving the wallet
-	recipient  string // Recipient address for the transaction
+	action            string // Action to perform: createWallet, createTx
+	walletFile        string // Filename for saving the wallet
+	recipient         string // Recipient address for the transaction
+	address           string // Address of the node (e.g., "127.0.0.1:8080")
+	bootstrapNodeAddr string // Address of the bootstrap node to join the network
 )
 
 func init() {
@@ -20,6 +22,8 @@ func init() {
 	flag.StringVar(&action, "action", "create", "Action to perform: 'createWallet', 'createTx'")
 	flag.StringVar(&walletFile, "wallet", "wallet.json", "Filename for saving the wallet")
 	flag.StringVar(&recipient, "recipient", "", "Recipient address for the transaction")
+	flag.StringVar(&address, "address", "", "IP address of the node (e.g., 127.0.0.1:8080")
+	flag.StringVar(&bootstrapNodeAddr, "bootstrap", "", "Address of the bootstrap node to join the network")
 }
 
 func main() {
@@ -67,7 +71,7 @@ func createTransaction() {
 	fmt.Printf("Transaction created!\nID: %s\n", tx.TransactionID)
 
 	// Send the transaction to the network
-	err = wallet.SendTransaction(tx, "", "")
+	err = wallet.SendTransaction(tx, address, bootstrapNodeAddr)
 	if err != nil {
 		log.Fatalf("Failed to send transaction: %v\n", err)
 	}
