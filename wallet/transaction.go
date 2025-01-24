@@ -2,7 +2,6 @@ package wallet
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
@@ -12,16 +11,10 @@ import (
 // CreateTransaction creates a new transaction
 func (w *Wallet) CreateTransaction(recipient string, amount float64, fee float64) (*transaction.Transaction, error) {
 	// Create the transaction
-	tx := transaction.Transaction{
-		Sender:    w.GetAddress(),
-		Recipient: recipient,
-		Amount:    amount,
-		Fee:       fee,
-		Timestamp: time.Now().Unix(),
+	tx, err := transaction.NewUnsignedTransaction(w.GetAddress(), recipient, amount, fee)
+	if err != nil {
+		return nil, err
 	}
-
-	// Generate the transaction ID
-	tx.TransactionID = tx.GenerateTransactionID()
 
 	// Sign the transaction
 	data := fmt.Sprintf("%s%s%f%f%d", tx.Sender, tx.Recipient, tx.Amount, tx.Fee, tx.Timestamp)
@@ -31,7 +24,7 @@ func (w *Wallet) CreateTransaction(recipient string, amount float64, fee float64
 	}
 	tx.Signature = signature
 
-	return &tx, nil
+	return tx, nil
 }
 
 // SendTransaction sends a transaction to a node in the network
