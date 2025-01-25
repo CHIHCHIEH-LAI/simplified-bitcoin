@@ -21,7 +21,7 @@ type Transaction struct {
 }
 
 // NewUnsignedTransaction creates a new unsigned transaction
-func NewUnsignedTransaction(sender, recipient string, amount, fee float64) (*Transaction, error) {
+func NewUnsignedTransaction(sender, recipient string, amount, fee float64) *Transaction {
 	// Create a new transaction
 	tx := Transaction{
 		Sender:    sender,
@@ -34,7 +34,14 @@ func NewUnsignedTransaction(sender, recipient string, amount, fee float64) (*Tra
 	// Generate the transaction ID
 	tx.TransactionID = tx.GenerateTransactionID()
 
-	return &tx, nil
+	return &tx
+}
+
+func NewCoinbaseTransaction(recipient string, amount float64) *Transaction {
+	// Create a new transaction
+	tx := NewUnsignedTransaction("coinbase", recipient, amount, 0)
+
+	return tx
 }
 
 // GenerateTransactionID generates a unique ID for the transaction
