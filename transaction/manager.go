@@ -63,7 +63,7 @@ func (mgr *TransactionManager) AddTransaction(tx *Transaction) error {
 // BroadcastTransaction broadcasts a transaction to the network
 func (mgr *TransactionManager) BroadcastTransaction(tx *Transaction, selectedMembers []string) error {
 	// Create and serialize a new transaction message
-	msg := NewTransactionMessage(tx, mgr.Sender)
+	msg := NewMessage(mgr.Sender, tx)
 	messageData := msg.Serialize()
 
 	// Broadcast the message to the network
