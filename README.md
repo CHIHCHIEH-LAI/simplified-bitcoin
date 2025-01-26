@@ -42,7 +42,7 @@ Explanation of Flags
 
 ### Create a Transaction
 ```
-go run cmd/wallet/main.go -address=127.0.0.1:8081 -bootstrap=127.0.0.1:8000 -action=createTx -wallet=wallet.json -recipient=user1 -amount=0.01 -fee=0.001
+go run cmd/wallet/main.go -address=127.0.0.1:8081 -bootstrap=127.0.0.1:8080 -action=createTx -wallet=wallet.json -recipient=user1 -amount=0.01 -fee=0.001
 ```
 
 ## Improvements
