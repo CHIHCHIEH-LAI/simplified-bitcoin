@@ -43,5 +43,4 @@ func HandleConnection(conn net.Conn, messageChannel chan<- string) {
 	// Deserialize the received message data
 	data := string(buffer[:n])
 	messageChannel <- data
-	log.Printf("Message data passed to handler: %+v\n", data)
 }
