@@ -7,7 +7,7 @@ import (
 // SelectMembers selects n_member random members from the member list
 func (mgr *MembershipManager) SelectNMembers(n_target int) []string {
 	selectedMembers := make(map[int]bool)
-	limit := min(n_target, len(mgr.MemberList))
+	limit := min(n_target, len(mgr.MemberList)-1)
 
 	for len(selectedMembers) < limit {
 		index := rand.Intn(len(mgr.MemberList))
