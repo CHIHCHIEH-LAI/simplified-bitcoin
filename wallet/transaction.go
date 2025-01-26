@@ -3,7 +3,6 @@ package wallet
 import (
 	"fmt"
 
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/transaction"
 )
@@ -26,15 +25,11 @@ func (w *Wallet) CreateTransaction(recipient string, amount float64, fee float64
 
 // SendTransaction sends a transaction to a node in the network
 func SendTransaction(tx *transaction.Transaction, selfAddress string, nodeAddress string) error {
-	// Serialize the transaction
-	txData := tx.Serialize()
-
 	// Create and serialize the mwssage
-	message := message.Message{
-		Type:    message.NEWTRANSACTION,
-		Sender:  selfAddress,
-		Payload: txData,
-	}
+	message := transaction.NewMessage(
+		selfAddress,
+		tx,
+	)
 	messageData := message.Serialize()
 
 	// Send the message to the node
