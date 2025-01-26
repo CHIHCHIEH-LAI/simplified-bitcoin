@@ -1,11 +1,13 @@
 package transaction
 
-import "github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
+import (
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
+)
 
-func NewTransactionMessage(tx *Transaction, sender string) *message.Message {
-	return &message.Message{
-		Type:    message.NEWTRANSACTION,
-		Sender:  sender,
-		Payload: tx.Serialize(),
-	}
+func NewMessage(sender string, tx *Transaction) *message.Message {
+	return message.NewMessage(
+		message.NEWTRANSACTION,
+		sender,
+		tx.Serialize(),
+	)
 }
