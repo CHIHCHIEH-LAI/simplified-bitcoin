@@ -10,20 +10,24 @@ import (
 )
 
 var (
-	action            string // Action to perform: createWallet, createTx
-	walletFile        string // Filename for saving the wallet
-	recipient         string // Recipient address for the transaction
-	address           string // Address of the node (e.g., "127.0.0.1:8080")
-	bootstrapNodeAddr string // Address of the bootstrap node to join the network
+	address           string  // Address of the node (e.g., "127.0.0.1:8080")
+	bootstrapNodeAddr string  // Address of the bootstrap node to join the network
+	action            string  // Action to perform: createWallet, createTx
+	walletFile        string  // Filename for saving the wallet
+	recipient         string  // Recipient address for the transaction
+	amount            float64 // Amount to send in the transaction
+	fee               float64 // Transaction fee
 )
 
 func init() {
 	// Define command-line flags
+	flag.StringVar(&address, "address", "", "IP address of the node (e.g., 127.0.0.1:8080")
+	flag.StringVar(&bootstrapNodeAddr, "bootstrap", "", "Address of the bootstrap node to join the network")
 	flag.StringVar(&action, "action", "create", "Action to perform: 'createWallet', 'createTx'")
 	flag.StringVar(&walletFile, "wallet", "wallet.json", "Filename for saving the wallet")
 	flag.StringVar(&recipient, "recipient", "", "Recipient address for the transaction")
-	flag.StringVar(&address, "address", "", "IP address of the node (e.g., 127.0.0.1:8080")
-	flag.StringVar(&bootstrapNodeAddr, "bootstrap", "", "Address of the bootstrap node to join the network")
+	flag.Float64Var(&amount, "amount", 0.0, "Amount to send in the transaction")
+	flag.Float64Var(&fee, "fee", 0.0, "Transaction fee")
 }
 
 func main() {
@@ -64,7 +68,7 @@ func createTransaction() {
 	}
 
 	// Create a new transaction
-	tx, err := w.CreateTransaction(recipient, 0.01, 0.0001)
+	tx, err := w.CreateTransaction(recipient, amount, fee)
 	if err != nil {
 		log.Fatalf("Failed to create transaction: %v\n", err)
 	}

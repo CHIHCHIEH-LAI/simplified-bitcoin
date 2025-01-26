@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/utils"
 )
 
 const (
@@ -18,6 +20,16 @@ type Message struct {
 	Sender    string `json:"sender"`    // Sender of the message
 	Payload   string `json:"payload"`   // Payload of the message (as JSON string)
 	Timestamp int64  `json:"timestamp"` // Timestamp of the message
+}
+
+// NewMessage creates a new message
+func NewMessage(msgType, sender, payload string) *Message {
+	return &Message{
+		Type:      msgType,
+		Sender:    sender,
+		Payload:   payload,
+		Timestamp: utils.GetCurrentTimeInUnix(),
+	}
 }
 
 // Serialize serializes the message into a string

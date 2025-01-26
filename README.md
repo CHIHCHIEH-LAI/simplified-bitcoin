@@ -33,11 +33,16 @@ Explanation of Flags
 
 ### Create a Wallet with a Private Key and a Public Key
 ```
-go run cmd/wallet/main.go -action=create -walletFile=wallet.json
+go run cmd/wallet/main.go -action=createWallet -wallet=wallet.json
 ```
 
 Explanation of Flags
 - -action: Action to perform
 - -walletFile: The filename for saving the wallet
+
+### Create a Transaction
+```
+go run cmd/wallet/main.go -address=127.0.0.1:8081 -bootstrap=127.0.0.1:8000 -action=createTx -wallet=wallet.json -recipient=user1 -amount=0.01 -fee=0.001
+```
 
 ## Improvements
