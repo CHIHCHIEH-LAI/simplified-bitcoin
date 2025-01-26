@@ -53,12 +53,12 @@ func (tx *Transaction) GenerateTransactionID() string {
 
 // Serialize serializes the transaction into a string
 func (tx *Transaction) Serialize() string {
-	return fmt.Sprintf("%s|%s|%s|%f|%f|%d|%s", tx.TransactionID, tx.Sender, tx.Recipient, tx.Amount, tx.Fee, tx.Timestamp, tx.Signature)
+	return fmt.Sprintf("%s;%s;%s;%f;%f;%d;%s", tx.TransactionID, tx.Sender, tx.Recipient, tx.Amount, tx.Fee, tx.Timestamp, tx.Signature)
 }
 
 // DeserializeTransaction deserializes the transaction from a string
 func DeserializeTransaction(data string) (Transaction, error) {
-	parts := strings.Split(data, "|")
+	parts := strings.Split(data, ";")
 	if len(parts) != 7 {
 		return Transaction{}, fmt.Errorf("invalid transaction format")
 	}
