@@ -9,6 +9,12 @@
 ### Non-Functional
 TBD
 
+## Test
+### To Test All Files
+```
+go test ./... -v
+```
+
 ## Execute
 ### Start a Long-Running P2P Node on Simplified-Bitcoin Blockchain
 
