@@ -29,7 +29,11 @@ func (b *Block) GenerateBlockID() string {
 }
 
 // NewBlock creates a new block with the given previous hash and transactions
-func NewBlock(prevHash string, transactions []*transaction.Transaction) *Block {
+func NewBlock(prevHash string, transactions []*transaction.Transaction, miner string, reward float64) *Block {
+	// Create a coinbase transaction to reward the miner
+	coinbaseTx := transaction.NewCoinbaseTransaction(miner, reward)
+	transactions = append([]*transaction.Transaction{coinbaseTx}, transactions...)
+
 	block := &Block{
 		PrevHash:     prevHash,
 		Timestamp:    0,
@@ -42,7 +46,7 @@ func NewBlock(prevHash string, transactions []*transaction.Transaction) *Block {
 
 // NewGenesisBlock creates the first block in the blockchain
 func NewGenesisBlock() *Block {
-	return NewBlock("", nil)
+	return NewBlock("", nil, "", 0)
 }
 
 // ValidateBlockID validates the block ID
