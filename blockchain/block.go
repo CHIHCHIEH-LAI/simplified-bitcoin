@@ -16,11 +16,16 @@ type Block struct {
 	Transactions []*transaction.Transaction
 }
 
-// GenerateBlockID generates a unique ID for the block
-func (b *Block) GenerateBlockID() string {
+// Hash returns the hash of the block
+func (b *Block) Hash() string {
 	data := fmt.Sprintf("%s%d%d", b.PrevHash, b.Timestamp, b.Nonce)
 	hash := sha256.Sum256([]byte(data))
 	return hex.EncodeToString(hash[:])
+}
+
+// GenerateBlockID generates a unique ID for the block
+func (b *Block) GenerateBlockID() string {
+	return b.Hash()
 }
 
 // NewBlock creates a new block with the given previous hash and transactions
