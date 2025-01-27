@@ -3,64 +3,45 @@ package mining
 import (
 	"log"
 	"strings"
-	"sync"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/blockchain"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/transaction"
 )
 
 type Miner struct {
-	Transactions *[]*transaction.Transaction // Reference to the transaction pool
-	Blockchain   *blockchain.Blockchain      // Reference to the blockchain
-	Difficulty   int                         // Difficulty of the mining process
-	StopMining   chan bool                   // Channel to stop the mining process
-	MutexPool    *sync.Mutex                 // Mutex to lock the transaction pool
+	Address      string                     // Address of the miner
+	Transactions []*transaction.Transaction // Reference to the transaction pool
+	Blockchain   *blockchain.Blockchain     // Reference to the blockchain
+	Difficulty   int                        // Difficulty of the mining process
+	StopMining   chan bool                  // Channel to stop the mining process
 }
 
 // NewMiner creates a new miner with the given transaction pool and difficulty
-func NewMiner(transactions *[]*transaction.Transaction, difficulty int) *Miner {
+func NewMiner(address string, transactions []*transaction.Transaction, blockchain *blockchain.Blockchain, difficulty int) *Miner {
 	return &Miner{
+		Address:      address,
 		Transactions: transactions,
+		Blockchain:   blockchain,
 		Difficulty:   difficulty,
 		StopMining:   make(chan bool),
-		MutexPool:    &sync.Mutex{},
 	}
 }
 
 // StartMining starts the mining process with the given miner address
-func (miner *Miner) StartMining(minerAddress string) {
+func (miner *Miner) Start() {
 	log.Println("Starting mining process...")
 
-	// Get transactions
-	transactions := miner.GetTransactions()
-
-	if len(transactions) == 0 {
-		log.Println("Transaction pool is empty. Skipping mining process...")
+	// Skip mining process if the transaction pool is empty
+	if len(miner.Transactions) == 0 {
+		log.Println("Transactions is empty. Skipping mining process...")
 		return
 	}
 
-	// Create a coinbase transaction to reward the miner
-	coinbaseTx := transaction.NewCoinbaseTransaction(minerAddress, REWARD)
-	transactions = append([]*transaction.Transaction{coinbaseTx}, transactions...)
-
-	// Get the lastest block from the blockchain
-	latestBlock := miner.Blockchain.GetLatestBlock()
-
-	newBlock := blockchain.NewBlock(latestBlock.BlockID, transactions)
+	// Create a new block with the miner's address and reward
+	newBlock := miner.Blockchain.NewBlock(miner.Transactions, miner.Address, REWARD)
 
 	// Perform the proof of work algorithm
 	miner.PerformProofOfWork(newBlock)
-
-}
-
-// GetTransactionsFromPool gets transactions
-func (miner *Miner) GetTransactions() []*transaction.Transaction {
-	miner.MutexPool.Lock()
-	defer miner.MutexPool.Unlock()
-
-	transactions := miner.Transactions
-
-	return *transactions
 }
 
 // PerformProofOfWork performs the proof of work algorithm
@@ -84,8 +65,8 @@ func (miner *Miner) PerformProofOfWork(block *blockchain.Block) {
 				miner.BroadcastBlock(block)
 				return
 			}
+			block.Nonce++
 		}
-		block.Nonce++
 	}
 }
 
