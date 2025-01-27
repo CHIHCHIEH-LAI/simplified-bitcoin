@@ -1,6 +1,10 @@
 package blockchain
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/transaction"
+)
 
 type Blockchain struct {
 	Blocks []*Block    // Chain of blocks
@@ -12,6 +16,10 @@ func NewBlockchain() *Blockchain {
 	return &Blockchain{
 		Blocks: []*Block{NewGenesisBlock()},
 	}
+}
+
+func (bc *Blockchain) NewBlock(transactions []*transaction.Transaction, miner string, reward float64) *Block {
+	return NewBlock(bc.GetLatestBlock().BlockID, transactions, miner, reward)
 }
 
 // AddBlock adds a new block to the blockchain
