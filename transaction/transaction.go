@@ -37,9 +37,9 @@ func NewUnsignedTransaction(sender, recipient string, amount, fee float64) *Tran
 	return &tx
 }
 
-func NewCoinbaseTransaction(recipient string, amount float64) *Transaction {
+func NewCoinbaseTransaction(miner string, reward float64) *Transaction {
 	// Create a new transaction
-	tx := NewUnsignedTransaction("coinbase", recipient, amount, 0)
+	tx := NewUnsignedTransaction("coinbase", miner, reward, 0)
 
 	return tx
 }
