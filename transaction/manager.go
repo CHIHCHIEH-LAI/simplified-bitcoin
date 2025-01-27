@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"sync"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
@@ -13,6 +14,7 @@ import (
 type TransactionManager struct {
 	Sender          string
 	TransactionPool map[string]*Transaction
+	Mutex           *sync.Mutex
 }
 
 // NewTransactionManager creates a new transaction manager
@@ -20,6 +22,7 @@ func NewTransactionManager(address string) *TransactionManager {
 	return &TransactionManager{
 		Sender:          address,
 		TransactionPool: make(map[string]*Transaction),
+		Mutex:           &sync.Mutex{},
 	}
 }
 
@@ -53,6 +56,9 @@ func (mgr *TransactionManager) HandleNewTransaction(msg *message.Message, select
 
 // AddTransaction adds a transaction to the pool
 func (mgr *TransactionManager) AddTransaction(tx *Transaction) error {
+	mgr.Mutex.Lock()
+	defer mgr.Mutex.Unlock()
+
 	if mgr.TransactionPool[tx.TransactionID] != nil {
 		return fmt.Errorf("Transaction with ID %s already exists", tx.TransactionID)
 	}
