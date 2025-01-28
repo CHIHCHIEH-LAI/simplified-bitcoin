@@ -45,8 +45,8 @@ func (mgr *MembershipManager) IntroduceSelfToGroup() {
 }
 
 // NewJOINREQMessage creates a new JOINREQ message
-func NewJOINREQMessage(sender string) message.Message {
-	return message.Message{
+func NewJOINREQMessage(sender string) *message.Message {
+	return &message.Message{
 		Type:      message.JOINREQ,
 		Sender:    sender,
 		Payload:   "",
@@ -55,8 +55,8 @@ func NewJOINREQMessage(sender string) message.Message {
 }
 
 // NewJOINRESPMessage creates a new JOINRESP message
-func NewJOINRESPMessage(sender string, payload string) message.Message {
-	return message.Message{
+func NewJOINRESPMessage(sender string, payload string) *message.Message {
+	return &message.Message{
 		Type:      message.JOINRESP,
 		Sender:    sender,
 		Payload:   payload,
