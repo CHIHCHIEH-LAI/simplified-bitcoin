@@ -16,7 +16,7 @@ type Miner struct {
 	StopMining   chan bool                  // Channel to stop the mining process
 }
 
-// NewMiner creates a new miner with the given transaction pool and difficulty
+// NewMiner creates a new miner with the given transactions, blockchain and difficulty
 func NewMiner(address string, transactions []*transaction.Transaction, blockchain *blockchain.Blockchain, difficulty int) *Miner {
 	return &Miner{
 		Address:      address,
