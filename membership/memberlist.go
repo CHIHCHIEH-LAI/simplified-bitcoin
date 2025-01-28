@@ -8,15 +8,16 @@ import (
 )
 
 type Member struct {
-	Address   string `json:"address"`
-	Heartbeat int64  `json:"heartbeat"`
-	Timestamp int64  `json:"timestamp"`
+	Address   string `json:"address"`   // IP:Port
+	Heartbeat int64  `json:"heartbeat"` // Number of heartbeats
+	Timestamp int64  `json:"timestamp"` // Timestamp of the last heartbeat
 }
 
 type MemberList struct {
-	Members []*Member `json:"members"`
+	Members []*Member `json:"members"` // List of members
 }
 
+// NewMemberList creates a new member list
 func NewMemberList() *MemberList {
 	return &MemberList{
 		Members: []*Member{},
