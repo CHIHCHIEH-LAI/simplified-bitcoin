@@ -7,8 +7,8 @@ import (
 )
 
 type Blockchain struct {
-	Blocks []*Block    // Chain of blocks
-	mutex  *sync.Mutex // Mutex to lock the blockchain
+	Blocks []*Block    `json:"blocks"` // Blocks in the blockchain
+	mutex  *sync.Mutex // Mutex to protect the blockchain
 }
 
 // NewBlockchain creates a new blockchain with the genesis block
@@ -18,6 +18,7 @@ func NewBlockchain() *Blockchain {
 	}
 }
 
+// NewBlock creates a new block with the given transactions
 func (bc *Blockchain) NewBlock(transactions []*transaction.Transaction, miner string, reward float64) *Block {
 	return NewBlock(bc.GetLatestBlock().BlockID, transactions, miner, reward)
 }
