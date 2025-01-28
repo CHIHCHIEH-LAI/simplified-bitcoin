@@ -7,8 +7,8 @@ import (
 )
 
 type Blockchain struct {
-	Blocks []*Block    // Chain of blocks
-	mutex  *sync.Mutex // Mutex to lock the blockchain
+	Blocks []*Block    `json:"blocks"` // Blocks in the blockchain
+	mutex  *sync.Mutex // Mutex to protect the blockchain
 }
 
 // NewBlockchain creates a new blockchain with the genesis block
