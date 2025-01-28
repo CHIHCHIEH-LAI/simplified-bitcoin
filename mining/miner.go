@@ -62,17 +62,11 @@ func (miner *Miner) PerformProofOfWork(block *blockchain.Block) {
 				log.Printf("Block mined: %s\n", blockHash)
 				block.BlockID = blockHash
 				miner.Blockchain.AddBlock(block)
-				miner.BroadcastBlock(block)
 				return
 			}
 			block.Nonce++
 		}
 	}
-}
-
-// TODO: Implement the BroadcastBlock function
-// BroadcastBlock broadcasts a block to the network
-func (miner *Miner) BroadcastBlock(block *blockchain.Block) {
 }
 
 // Stop terminates the mining process
