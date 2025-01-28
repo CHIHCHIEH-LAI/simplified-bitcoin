@@ -1,20 +1,4 @@
 # Simplified BitCoin
-## Requirements
-### Functional
-- Allow users to mine blocks
-- Support transactions
-- Store the blockchain consistently
-- Synchronize data across nodes
-
-### Non-Functional
-TBD
-
-## Test
-### To Test All Files
-```
-go test ./... -v
-```
-
 ## Execute
 ### Start a Long-Running P2P Node on Simplified-Bitcoin Blockchain
 
