@@ -1,11 +1,8 @@
 package transaction
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
+	"encoding/json"
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/utils"
 )
@@ -47,47 +44,24 @@ func NewCoinbaseTransaction(miner string, reward float64) *Transaction {
 // GenerateTransactionID generates a unique ID for the transaction
 func (tx *Transaction) GenerateTransactionID() string {
 	data := fmt.Sprintf("%s%s%f%f%d", tx.Sender, tx.Recipient, tx.Amount, tx.Fee, tx.Timestamp)
-	hash := sha256.Sum256([]byte(data))
-	return hex.EncodeToString(hash[:])
+	return utils.Hash(data)
 }
 
 // Serialize serializes the transaction into a string
-func (tx *Transaction) Serialize() string {
-	return fmt.Sprintf("%s;%s;%s;%f;%f;%d;%s", tx.TransactionID, tx.Sender, tx.Recipient, tx.Amount, tx.Fee, tx.Timestamp, tx.Signature)
+func (tx *Transaction) Serialize() (string, error) {
+	data, err := json.Marshal(tx)
+	if err != nil {
+		return "", fmt.Errorf("failed to serialize transaction: %v", err)
+	}
+	return string(data), nil
 }
 
 // DeserializeTransaction deserializes the transaction from a string
-func DeserializeTransaction(data string) (Transaction, error) {
-	parts := strings.Split(data, ";")
-	if len(parts) != 7 {
-		return Transaction{}, fmt.Errorf("invalid transaction format")
-	}
-
-	tx := Transaction{
-		TransactionID: parts[0],
-		Sender:        parts[1],
-		Recipient:     parts[2],
-	}
-
-	amount, err := strconv.ParseFloat(parts[3], 64)
+func DeserializeTransaction(data string) (*Transaction, error) {
+	var tx Transaction
+	err := json.Unmarshal([]byte(data), &tx)
 	if err != nil {
-		return Transaction{}, fmt.Errorf("failed to parse amount: %v", err)
+		return nil, fmt.Errorf("failed to deserialize message: %v", err)
 	}
-	tx.Amount = amount
-
-	fee, err := strconv.ParseFloat(parts[4], 64)
-	if err != nil {
-		return Transaction{}, fmt.Errorf("failed to parse fee: %v", err)
-	}
-	tx.Fee = fee
-
-	timestamp, err := strconv.ParseInt(parts[5], 10, 64)
-	if err != nil {
-		return Transaction{}, fmt.Errorf("failed to parse timestamp: %v", err)
-	}
-	tx.Timestamp = timestamp
-
-	tx.Signature = parts[6]
-
-	return tx, nil
+	return &tx, nil
 }
