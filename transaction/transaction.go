@@ -43,6 +43,11 @@ func NewCoinbaseTransaction(miner string, reward float64) *Transaction {
 
 // GenerateTransactionID generates a unique ID for the transaction
 func (tx *Transaction) GenerateTransactionID() string {
+	data := fmt.Sprintf("%s%s%f%f%d%s", tx.Sender, tx.Recipient, tx.Amount, tx.Fee, tx.Timestamp, tx.Signature)
+	return utils.Hash(data)
+}
+
+func (tx *Transaction) Hash() string {
 	data := fmt.Sprintf("%s%s%f%f%d", tx.Sender, tx.Recipient, tx.Amount, tx.Fee, tx.Timestamp)
 	return utils.Hash(data)
 }
