@@ -17,7 +17,7 @@ const (
 )
 
 type Message struct {
-	Type      string `json:"type"`      // Type of the message (e.g. HEARTBEAT, TRANSACTION, BLOCK, etc)
+	Type      string `json:"type"`      // Type of the message (e.g. HEARTBEAT, NEWTRANSACTION, etc)
 	Sender    string `json:"sender"`    // Sender of the message
 	Payload   string `json:"payload"`   // Payload of the message (as JSON string)
 	Timestamp int64  `json:"timestamp"` // Timestamp of the message
