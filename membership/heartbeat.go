@@ -28,18 +28,23 @@ func (mgr *MembershipManager) HandleHeartbeat(msg *message.Message) {
 	}
 
 	// Update the member list
-	mgr.UpdateMemberList(memberList)
+	mgr.MemberList.UpdateMemberList(memberList, mgr.Address)
 }
 
 // SendHeartbeat sends a heartbeat message to some random members in the network
 func (mgr *MembershipManager) SendHeartbeat() {
 	// Skip if there is only one member in the network
-	if len(mgr.MemberList) == 1 {
+	if len(mgr.MemberList.Members) == 1 {
 		return
 	}
 
 	// Create a HEARTBEAT message and serialize it
-	payload := SerializeMemberList(mgr.MemberList)
+	payload, err := mgr.MemberList.Serialize()
+	if err != nil {
+		log.Printf("Failed to serialize member list: %v\n", err)
+		return
+	}
+
 	message := NewHEARTBEATMessage(mgr.Address, payload)
 	messageData, err := message.Serialize()
 	if err != nil {
