@@ -70,7 +70,10 @@ func (mgr *TransactionManager) AddTransaction(tx *Transaction) error {
 func (mgr *TransactionManager) BroadcastTransaction(tx *Transaction, selectedMembers []string) error {
 	// Create and serialize a new transaction message
 	msg := NewMessage(mgr.Sender, tx)
-	messageData := msg.Serialize()
+	messageData, err := msg.Serialize()
+	if err != nil {
+		return fmt.Errorf("failed to serialize transaction message: %v", err)
+	}
 
 	// Broadcast the message to the network
 	for _, address := range selectedMembers {

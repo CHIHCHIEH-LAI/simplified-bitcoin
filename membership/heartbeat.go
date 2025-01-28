@@ -19,7 +19,7 @@ func NewHEARTBEATMessage(sender string, payload string) message.Message {
 }
 
 // HandleHeartbeat processes a HEARTBEAT message
-func (mgr *MembershipManager) HandleHeartbeat(msg message.Message) {
+func (mgr *MembershipManager) HandleHeartbeat(msg *message.Message) {
 	// Deserialize the member list from the payload
 	memberList, err := DeserializeMemberList(msg.Payload)
 	if err != nil {
@@ -41,7 +41,11 @@ func (mgr *MembershipManager) SendHeartbeat() {
 	// Create a HEARTBEAT message and serialize it
 	payload := SerializeMemberList(mgr.MemberList)
 	message := NewHEARTBEATMessage(mgr.Address, payload)
-	messageData := message.Serialize()
+	messageData, err := message.Serialize()
+	if err != nil {
+		log.Printf("Failed to serialize HEARTBEAT message: %v\n", err)
+		return
+	}
 
 	// Select some random members to send the HEARTBEAT message
 	selectedMembers := mgr.SelectNMembers(NUMMEMBERSTOHEARTBEAT)

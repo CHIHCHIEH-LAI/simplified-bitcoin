@@ -30,10 +30,13 @@ func SendTransaction(tx *transaction.Transaction, selfAddress string, nodeAddres
 		selfAddress,
 		tx,
 	)
-	messageData := message.Serialize()
+	messageData, err := message.Serialize()
+	if err != nil {
+		return fmt.Errorf("failed to serialize transaction message: %v", err)
+	}
 
 	// Send the message to the node
-	err := network.SendMessageData(nodeAddress, messageData)
+	err = network.SendMessageData(nodeAddress, messageData)
 	if err != nil {
 		return err
 	}

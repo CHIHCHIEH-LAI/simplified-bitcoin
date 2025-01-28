@@ -19,10 +19,13 @@ func (mgr *MembershipManager) JoinGroup(bootstrapNodeAddress string) error {
 
 	// Create a JOINREQ message and serialize it
 	message := NewJOINREQMessage(mgr.Address)
-	messageData := message.Serialize()
+	messageData, err := message.Serialize()
+	if err != nil {
+		return fmt.Errorf("failed to serialize JOINREQ message: %v", err)
+	}
 
 	// Send JOINREQ message to bootstrap node
-	err := network.SendMessageData(bootstrapNodeAddress, messageData)
+	err = network.SendMessageData(bootstrapNodeAddress, messageData)
 	if err != nil {
 		return fmt.Errorf("failed to send JOINREQ message: %v", err)
 	}
@@ -62,7 +65,7 @@ func NewJOINRESPMessage(sender string, payload string) message.Message {
 }
 
 // HandleJoinRequest processes a JOINREQ message
-func (mgr *MembershipManager) HandleJoinRequest(msg message.Message) {
+func (mgr *MembershipManager) HandleJoinRequest(msg *message.Message) {
 	// Check if the sender is already in the member list
 	if index := mgr.FindMemberInList(msg.Sender); index == -1 {
 		// Add the sender to the member list
@@ -81,15 +84,20 @@ func (mgr *MembershipManager) HandleJoinRequest(msg message.Message) {
 	// Send JOINREP message to the sender with the current member list
 	payload := SerializeMemberList(mgr.MemberList)
 	message := NewJOINRESPMessage(mgr.Address, payload)
-	messageData := message.Serialize()
-	err := network.SendMessageData(msg.Sender, messageData)
+	messageData, err := message.Serialize()
+	if err != nil {
+		log.Printf("Failed to serialize JOINRESP message: %v\n", err)
+		return
+	}
+
+	err = network.SendMessageData(msg.Sender, messageData)
 	if err != nil {
 		log.Printf("Failed to send JOINRESP message: %v\n", err)
 	}
 }
 
 // HandleJoinResponse processes a JOINRESP message
-func (mgr *MembershipManager) HandleJoinResponse(msg message.Message) {
+func (mgr *MembershipManager) HandleJoinResponse(msg *message.Message) {
 	// Deserialize the member list from the payload
 	memberList, err := DeserializeMemberList(msg.Payload)
 	if err != nil {
