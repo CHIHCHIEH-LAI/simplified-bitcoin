@@ -26,10 +26,14 @@ func (w *Wallet) CreateTransaction(recipient string, amount float64, fee float64
 // SendTransaction sends a transaction to a node in the network
 func SendTransaction(tx *transaction.Transaction, selfAddress string, nodeAddress string) error {
 	// Create and serialize the mwssage
-	message := transaction.NewMessage(
+	message, err := transaction.NewMessage(
 		selfAddress,
 		tx,
 	)
+	if err != nil {
+		return fmt.Errorf("failed to create transaction message: %v", err)
+	}
+
 	messageData, err := message.Serialize()
 	if err != nil {
 		return fmt.Errorf("failed to serialize transaction message: %v", err)
