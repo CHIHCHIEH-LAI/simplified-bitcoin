@@ -11,6 +11,7 @@ import (
 type Block struct {
 	BlockID      string                     `json:"block_id"`     // Hash of the block
 	PrevHash     string                     `json:"prev_hash"`    // Hash of the previous block
+	MerkleRoot   string                     `json:"merkle_root"`  // Merkle root of the transactions
 	Timestamp    int64                      `json:"timestamp"`    // Unix timestamp
 	Nonce        int                        `json:"nonce"`        // Proof of work
 	Transactions []*transaction.Transaction `json:"transactions"` // List of transactions
@@ -18,7 +19,7 @@ type Block struct {
 
 // Hash returns the hash of the block
 func (b *Block) Hash() string {
-	data := fmt.Sprintf("%s%d%d", b.PrevHash, b.Timestamp, b.Nonce)
+	data := fmt.Sprintf("%s%s%d%d", b.PrevHash, b.MerkleRoot, b.Timestamp, b.Nonce)
 	return utils.Hash(data)
 }
 
@@ -33,8 +34,12 @@ func NewBlock(prevHash string, transactions []*transaction.Transaction, miner st
 	coinbaseTx := transaction.NewCoinbaseTransaction(miner, reward)
 	transactions = append([]*transaction.Transaction{coinbaseTx}, transactions...)
 
+	// Compute the Merkle root
+	merkleRoot := ComputeMerkleRoot(transactions)
+
 	block := &Block{
 		PrevHash:     prevHash,
+		MerkleRoot:   merkleRoot,
 		Timestamp:    0,
 		Nonce:        0,
 		Transactions: transactions,
@@ -83,4 +88,40 @@ func DeserializeBlock(data string) (*Block, error) {
 		return nil, fmt.Errorf("failed to deserialize block: %v", err)
 	}
 	return &block, nil
+}
+
+// ComputeMerkleRoot computes the Merkle Root for a list of transactions
+func ComputeMerkleRoot(transactions []*transaction.Transaction) string {
+	if len(transactions) == 0 {
+		return ""
+	}
+
+	// Step 1: Get the hash of each transaction
+	var transactionHashes []string
+	for _, tx := range transactions {
+		transactionHashes = append(transactionHashes, tx.Hash())
+	}
+
+	// Step 2: Compute the Merkle Root from the transaction hashes
+	for len(transactionHashes) > 1 {
+		var newLevel []string
+
+		// Process pairs of hashes
+		for i := 0; i < len(transactionHashes); i += 2 {
+			if i+1 < len(transactionHashes) {
+				// Pair of hashes
+				combinedHash := utils.HashPair(transactionHashes[i], transactionHashes[i+1])
+				newLevel = append(newLevel, combinedHash)
+			} else {
+				// Odd hash (duplicate the last hash)
+				combinedHash := utils.HashPair(transactionHashes[i], transactionHashes[i])
+				newLevel = append(newLevel, combinedHash)
+			}
+		}
+
+		transactionHashes = newLevel
+	}
+
+	// The last remaining hash is the Merkle Root
+	return transactionHashes[0]
 }
