@@ -1,11 +1,10 @@
 package blockchain
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/transaction"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/utils"
 )
 
 type Block struct {
@@ -19,8 +18,7 @@ type Block struct {
 // Hash returns the hash of the block
 func (b *Block) Hash() string {
 	data := fmt.Sprintf("%s%d%d", b.PrevHash, b.Timestamp, b.Nonce)
-	hash := sha256.Sum256([]byte(data))
-	return hex.EncodeToString(hash[:])
+	return utils.Hash(data)
 }
 
 // GenerateBlockID generates a unique ID for the block
