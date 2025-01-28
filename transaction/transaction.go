@@ -11,13 +11,13 @@ import (
 )
 
 type Transaction struct {
-	TransactionID string
-	Sender        string
-	Recipient     string
-	Amount        float64
-	Fee           float64
-	Timestamp     int64
-	Signature     string
+	TransactionID string  `json:"transaction_id"`
+	Sender        string  `json:"sender"`
+	Recipient     string  `json:"recipient"`
+	Amount        float64 `json:"amount"`
+	Fee           float64 `json:"fee"`
+	Timestamp     int64   `json:"timestamp"`
+	Signature     string  `json:"signature"`
 }
 
 // NewUnsignedTransaction creates a new unsigned transaction
