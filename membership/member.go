@@ -1,7 +1,11 @@
 package membership
 
 type Member struct {
-	Address   string
-	Heartbeat int64
-	Timestamp int64
+	Address   string `json:"address"`
+	Heartbeat int64  `json:"heartbeat"`
+	Timestamp int64  `json:"timestamp"`
+}
+
+type MemberList struct {
+	Members []Member `json:"members"`
 }
