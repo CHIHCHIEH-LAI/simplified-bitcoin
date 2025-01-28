@@ -47,10 +47,10 @@ func (mgr *TransactionManager) HandleNewTransaction(msg *message.Message, select
 	}
 
 	// Add the transaction to the pool
-	mgr.AddTransaction(&tx)
+	mgr.AddTransaction(tx)
 
 	// Broadcast the transaction to the network
-	mgr.BroadcastTransaction(&tx, selectedMembers)
+	mgr.BroadcastTransaction(tx, selectedMembers)
 
 }
 
@@ -69,7 +69,11 @@ func (mgr *TransactionManager) AddTransaction(tx *Transaction) error {
 // BroadcastTransaction broadcasts a transaction to the network
 func (mgr *TransactionManager) BroadcastTransaction(tx *Transaction, selectedMembers []string) error {
 	// Create and serialize a new transaction message
-	msg := NewMessage(mgr.Sender, tx)
+	msg, err := NewMessage(mgr.Sender, tx)
+	if err != nil {
+		return fmt.Errorf("failed to create transaction message: %v", err)
+	}
+
 	messageData, err := msg.Serialize()
 	if err != nil {
 		return fmt.Errorf("failed to serialize transaction message: %v", err)
