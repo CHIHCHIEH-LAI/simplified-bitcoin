@@ -13,6 +13,7 @@ const (
 	JOINRESP       = "JOINRESP"
 	HEARTBEAT      = "HEARTBEAT"
 	NEWTRANSACTION = "NEWTRANSACTION"
+	NEWBLOCK       = "NEWBLOCK"
 )
 
 type Message struct {
