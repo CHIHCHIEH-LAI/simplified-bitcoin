@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/transaction"
@@ -63,4 +64,23 @@ func (b *Block) ValidatePrevHash(prevHash string) error {
 	}
 
 	return nil
+}
+
+// Serialize serializes the block to a JSON string
+func (b *Block) Serialize() (string, error) {
+	data, err := json.Marshal(b)
+	if err != nil {
+		return "", fmt.Errorf("failed to serialize block: %v", err)
+	}
+	return string(data), nil
+}
+
+// DeserializeBlock deserializes a JSON string to a block
+func DeserializeBlock(data string) (*Block, error) {
+	var block Block
+	err := json.Unmarshal([]byte(data), &block)
+	if err != nil {
+		return nil, fmt.Errorf("failed to deserialize block: %v", err)
+	}
+	return &block, nil
 }
