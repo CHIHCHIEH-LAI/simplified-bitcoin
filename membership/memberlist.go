@@ -1,64 +1,68 @@
 package membership
 
 import (
+	"encoding/json"
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/utils"
 )
 
-// SerializeMemberList serializes a list of members into a string
-func SerializeMemberList(memberList []Member) string {
-	str := ""
-	for _, member := range memberList {
-		str += fmt.Sprintf("%s;%d;%d,", member.Address, member.Heartbeat, member.Timestamp)
-	}
-	return str
+type Member struct {
+	Address   string `json:"address"`
+	Heartbeat int64  `json:"heartbeat"`
+	Timestamp int64  `json:"timestamp"`
 }
 
-// DeserializeMemberList deserializes a string into a list of members
-func DeserializeMemberList(str string) ([]Member, error) {
-	memberList := []Member{}
-	members := strings.Split(str, ",")
-	for _, memberStr := range members {
-		if memberStr == "" {
-			continue
-		}
-		var member Member
-		parts := strings.Split(memberStr, ";")
-		if len(parts) != 3 {
-			return nil, fmt.Errorf("invalid member format")
-		}
-		member.Address = parts[0]
-		member.Heartbeat, _ = strconv.ParseInt(parts[1], 10, 64)
-		member.Timestamp, _ = strconv.ParseInt(parts[2], 10, 64)
-		memberList = append(memberList, member)
+type MemberList struct {
+	Members []*Member `json:"members"`
+}
+
+func NewMemberList() *MemberList {
+	return &MemberList{
+		Members: []*Member{},
 	}
-	return memberList, nil
+}
+
+// Serialize serializes the member list into a string
+func (ml *MemberList) Serialize() (string, error) {
+	data, err := json.Marshal(ml)
+	if err != nil {
+		return "", fmt.Errorf("failed to serialize memberlist: %v", err)
+	}
+	return string(data), nil
+}
+
+// DeserializeMemberList deserializes the member list from a string
+func DeserializeMemberList(data string) (*MemberList, error) {
+	var ml MemberList
+	err := json.Unmarshal([]byte(data), &ml)
+	if err != nil {
+		return nil, fmt.Errorf("failed to deserialize message: %v", err)
+	}
+	return &ml, nil
 }
 
 // UpdateMemberList updates the member list with the new list of members
-func (mgr *MembershipManager) UpdateMemberList(newMemberList []Member) {
-	for _, newMember := range newMemberList {
+func (ml *MemberList) UpdateMemberList(newMemberList *MemberList, selfAddr string) {
+	for _, newMember := range newMemberList.Members {
 		// Check if the member is self
-		if newMember.Address == mgr.Address {
+		if newMember.Address == selfAddr {
 			continue
 		}
 
 		// Find the member in the list
-		index := mgr.FindMemberInList(newMember.Address)
+		index := ml.FindMemberInList(newMember.Address)
 		if index == -1 { // Add the member if it does not exist
-			mgr.AddMemberToList(newMember)
-		} else if newMember.Heartbeat > mgr.MemberList[index].Heartbeat { // Update the member if the heartbeat is greater
-			mgr.UpdateMemberInList(index, newMember)
+			ml.AddMemberToList(newMember)
+		} else if newMember.Heartbeat > ml.Members[index].Heartbeat { // Update the member if the heartbeat is greater
+			ml.UpdateMemberInList(index, newMember)
 		}
 	}
 }
 
 // FindMemberInList finds a member in the list by address
-func (mgr *MembershipManager) FindMemberInList(address string) int {
-	for i, member := range mgr.MemberList {
+func (ml *MemberList) FindMemberInList(address string) int {
+	for i, member := range ml.Members {
 		if member.Address == address {
 			return i
 		}
@@ -67,43 +71,43 @@ func (mgr *MembershipManager) FindMemberInList(address string) int {
 }
 
 // AddMemberToList adds a member to the list
-func (mgr *MembershipManager) AddMemberToList(member Member) {
-	mgr.MemberList = append(mgr.MemberList, member)
+func (ml *MemberList) AddMemberToList(member *Member) {
+	ml.Members = append(ml.Members, member)
 }
 
 // UpdateMemberInList updates a member in the list
-func (mgr *MembershipManager) UpdateMemberInList(index int, newMember Member) {
+func (ml *MemberList) UpdateMemberInList(index int, newMember *Member) {
 	// Check if the newMember is failed
 	if utils.GetCurrentTimeInUnix()-newMember.Timestamp > TIMENODEFAIL {
 		return
 	}
 
 	// Update the member in the list
-	mgr.MemberList[index].Heartbeat = newMember.Heartbeat
-	mgr.MemberList[index].Timestamp = utils.GetCurrentTimeInUnix()
+	ml.Members[index].Heartbeat = newMember.Heartbeat
+	ml.Members[index].Timestamp = utils.GetCurrentTimeInUnix()
 }
 
 // UpdateSelfInMemberList updates the self member in the member list
-func (mgr *MembershipManager) UpdateSelfInMemberList() {
-	index := mgr.FindMemberInList(mgr.Address)
+func (ml *MemberList) UpdateSelfInMemberList(selfAddr string) {
+	index := ml.FindMemberInList(selfAddr)
 	if index == -1 {
-		member := Member{
-			Address:   mgr.Address,
+		member := &Member{
+			Address:   selfAddr,
 			Heartbeat: 0,
 			Timestamp: utils.GetCurrentTimeInUnix(),
 		}
-		mgr.AddMemberToList(member)
+		ml.AddMemberToList(member)
 	} else {
-		mgr.MemberList[index].Heartbeat++
-		mgr.MemberList[index].Timestamp = utils.GetCurrentTimeInUnix()
+		ml.Members[index].Heartbeat++
+		ml.Members[index].Timestamp = utils.GetCurrentTimeInUnix()
 	}
 }
 
 // RemoveFailedNodes removes failed nodes from the member list
-func (mgr *MembershipManager) RemoveFailedNodes() {
-	for i, member := range mgr.MemberList {
+func (ml *MemberList) RemoveFailedMembers() {
+	for i, member := range ml.Members {
 		if utils.GetCurrentTimeInUnix()-member.Timestamp > TIMENODEREMOVE {
-			mgr.MemberList = append(mgr.MemberList[:i], mgr.MemberList[i+1:]...)
+			ml.Members = append(ml.Members[:i], ml.Members[i+1:]...)
 		}
 	}
 }
