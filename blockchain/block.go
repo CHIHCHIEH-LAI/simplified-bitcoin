@@ -16,15 +16,24 @@ type Block struct {
 	Transactions []*transaction.Transaction
 }
 
-// GenerateBlockID generates a unique ID for the block
-func (b *Block) GenerateBlockID() string {
+// Hash returns the hash of the block
+func (b *Block) Hash() string {
 	data := fmt.Sprintf("%s%d%d", b.PrevHash, b.Timestamp, b.Nonce)
 	hash := sha256.Sum256([]byte(data))
 	return hex.EncodeToString(hash[:])
 }
 
+// GenerateBlockID generates a unique ID for the block
+func (b *Block) GenerateBlockID() string {
+	return b.Hash()
+}
+
 // NewBlock creates a new block with the given previous hash and transactions
-func NewBlock(prevHash string, transactions []*transaction.Transaction) *Block {
+func NewBlock(prevHash string, transactions []*transaction.Transaction, miner string, reward float64) *Block {
+	// Create a coinbase transaction to reward the miner
+	coinbaseTx := transaction.NewCoinbaseTransaction(miner, reward)
+	transactions = append([]*transaction.Transaction{coinbaseTx}, transactions...)
+
 	block := &Block{
 		PrevHash:     prevHash,
 		Timestamp:    0,
@@ -37,7 +46,7 @@ func NewBlock(prevHash string, transactions []*transaction.Transaction) *Block {
 
 // NewGenesisBlock creates the first block in the blockchain
 func NewGenesisBlock() *Block {
-	return NewBlock("", nil)
+	return NewBlock("", nil, "", 0)
 }
 
 // ValidateBlockID validates the block ID
