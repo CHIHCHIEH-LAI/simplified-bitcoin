@@ -8,11 +8,11 @@ import (
 )
 
 type Block struct {
-	BlockID      string
-	PrevHash     string
-	Timestamp    int64
-	Nonce        int // Nonce is a number that miners use to change the hash of the block
-	Transactions []*transaction.Transaction
+	BlockID      string                     `json:"block_id"`     // Hash of the block
+	PrevHash     string                     `json:"prev_hash"`    // Hash of the previous block
+	Timestamp    int64                      `json:"timestamp"`    // Unix timestamp
+	Nonce        int                        `json:"nonce"`        // Proof of work
+	Transactions []*transaction.Transaction `json:"transactions"` // List of transactions
 }
 
 // Hash returns the hash of the block
