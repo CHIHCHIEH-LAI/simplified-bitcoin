@@ -29,7 +29,7 @@ func (node *Node) HandleMessage() {
 			node.MembershipManager.HandleHeartbeat(msg)
 		case message.NEWTRANSACTION:
 			selectedMembers := node.MembershipManager.SelectNMembers(transaction.NUM_MEMBERS_TO_BROADCAST)
-			node.TransactionManager.HandleNewTransaction(&msg, selectedMembers)
+			node.TransactionManager.HandleNewTransaction(msg, selectedMembers)
 		// case message.NEWBLOCK:
 		// 	node.HandleNewBlock(msg)
 		// case "GETBLOCKCHAIN":
