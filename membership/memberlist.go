@@ -43,7 +43,7 @@ func DeserializeMemberList(data string) (*MemberList, error) {
 }
 
 // UpdateMemberList updates the member list with the new list of members
-func (ml *MemberList) UpdateMemberList(newMemberList MemberList, selfAddr string) {
+func (ml *MemberList) UpdateMemberList(newMemberList *MemberList, selfAddr string) {
 	for _, newMember := range newMemberList.Members {
 		// Check if the member is self
 		if newMember.Address == selfAddr {
