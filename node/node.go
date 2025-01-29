@@ -32,7 +32,7 @@ func NewNode(address, port string) (*Node, error) {
 		Address:            address,
 		Port:               port,
 		Transceiver:        transceiver,
-		MembershipManager:  membership.NewMembershipManager(address),
+		MembershipManager:  membership.NewMembershipManager(address, transceiver),
 		TransactionManager: transaction.NewTransactionManager(),
 	}, nil
 }
