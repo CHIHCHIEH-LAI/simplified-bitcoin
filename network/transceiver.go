@@ -2,7 +2,7 @@ package network
 
 import "github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 
-type Tranceiver struct {
+type Transceiver struct {
 	ReceiverChannel    chan *message.Message // Channel to receive messages
 	TransmitterChannel chan *message.Message // Channel to transmit messages
 	Receiver           *Receiver             // Receiver instance
@@ -10,8 +10,8 @@ type Tranceiver struct {
 }
 
 // NewTranceiver creates a new tranceiver
-func NewTranceiver(port string) (*Tranceiver, error) {
-	tc := &Tranceiver{
+func NewTransceiver(port string) (*Transceiver, error) {
+	tc := &Transceiver{
 		ReceiverChannel:    make(chan *message.Message),
 		TransmitterChannel: make(chan *message.Message),
 	}
@@ -27,25 +27,34 @@ func NewTranceiver(port string) (*Tranceiver, error) {
 }
 
 // Run runs the tranceiver
-func (tc *Tranceiver) Run() {
+func (tc *Transceiver) Run() {
 	go tc.Receiver.Run()
 	go tc.Transmitter.Run()
 }
 
 // Transmit sends a message
-func (tc *Tranceiver) Transmit(msg *message.Message) {
+func (tc *Transceiver) Transmit(msg *message.Message) {
 	tc.TransmitterChannel <- msg
 }
 
 // Receive receives a message
-func (tc *Tranceiver) Receive() *message.Message {
-	return <-tc.ReceiverChannel
+func (tc *Transceiver) Receive() (*message.Message, bool) {
+	select {
+	case msg := <-tc.ReceiverChannel:
+		return msg, true
+	default:
+		return nil, false // No message available
+	}
 }
 
 // Close closes the tranceiver
-func (tc *Tranceiver) Close() {
-	close(tc.ReceiverChannel)
-	close(tc.TransmitterChannel)
+func (tc *Transceiver) Close() {
+	// Close the receiver and transmitter
 	tc.Receiver.Close()
 	tc.Transmitter.Close()
+
+	// Close the channels
+	close(tc.ReceiverChannel)
+	close(tc.TransmitterChannel)
+
 }

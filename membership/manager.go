@@ -3,19 +3,22 @@ package membership
 import (
 	"time"
 
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
 	"golang.org/x/exp/rand"
 )
 
 type MembershipManager struct {
-	Address    string
-	MemberList *MemberList
+	Address     string
+	MemberList  *MemberList
+	Transceiver *network.Transceiver
 }
 
 // NewMembershipManager creates a new membership manager
-func NewMembershipManager(address string) *MembershipManager {
+func NewMembershipManager(address string, transceiver *network.Transceiver) *MembershipManager {
 	return &MembershipManager{
-		Address:    address,
-		MemberList: NewMemberList(),
+		Address:     address,
+		MemberList:  NewMemberList(),
+		Transceiver: transceiver,
 	}
 }
 

@@ -1,11 +1,9 @@
 package membership
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/utils"
 )
 
@@ -17,18 +15,11 @@ func (mgr *MembershipManager) JoinGroup(bootstrapNodeAddress string) error {
 		return nil
 	}
 
-	// Create a JOINREQ message and serialize it
-	message := NewJOINREQMessage(mgr.Address)
-	messageData, err := message.Serialize()
-	if err != nil {
-		return fmt.Errorf("failed to serialize JOINREQ message: %v", err)
-	}
+	// Create a JOINREQ message
+	message := NewJOINREQMessage(mgr.Address, bootstrapNodeAddress)
 
-	// Send JOINREQ message to bootstrap node
-	err = network.SendMessageData(bootstrapNodeAddress, messageData)
-	if err != nil {
-		return fmt.Errorf("failed to send JOINREQ message: %v", err)
-	}
+	// Send JOINREQ message
+	mgr.Transceiver.Transmit(message)
 
 	return nil
 }
@@ -45,22 +36,24 @@ func (mgr *MembershipManager) IntroduceSelfToGroup() {
 }
 
 // NewJOINREQMessage creates a new JOINREQ message
-func NewJOINREQMessage(sender string) *message.Message {
+func NewJOINREQMessage(selfAddr, bootstrapAddr string) *message.Message {
 	return &message.Message{
-		Type:      message.JOINREQ,
-		Sender:    sender,
-		Payload:   "",
-		Timestamp: utils.GetCurrentTimeInUnix(),
+		Type:       message.JOINREQ,
+		Sender:     selfAddr,
+		Receipient: bootstrapAddr,
+		Payload:    "",
+		Timestamp:  utils.GetCurrentTimeInUnix(),
 	}
 }
 
 // NewJOINRESPMessage creates a new JOINRESP message
-func NewJOINRESPMessage(sender string, payload string) *message.Message {
+func NewJOINRESPMessage(selfAddr, receipient, payload string) *message.Message {
 	return &message.Message{
-		Type:      message.JOINRESP,
-		Sender:    sender,
-		Payload:   payload,
-		Timestamp: utils.GetCurrentTimeInUnix(),
+		Type:       message.JOINRESP,
+		Sender:     selfAddr,
+		Receipient: receipient,
+		Payload:    payload,
+		Timestamp:  utils.GetCurrentTimeInUnix(),
 	}
 }
 
@@ -86,17 +79,10 @@ func (mgr *MembershipManager) HandleJoinRequest(msg *message.Message) {
 		return
 	}
 
-	message := NewJOINRESPMessage(mgr.Address, payload)
-	messageData, err := message.Serialize()
-	if err != nil {
-		log.Printf("Failed to serialize JOINRESP message: %v\n", err)
-		return
-	}
+	message := NewJOINRESPMessage(mgr.Address, msg.Sender, payload)
 
-	err = network.SendMessageData(msg.Sender, messageData)
-	if err != nil {
-		log.Printf("Failed to send JOINRESP message: %v\n", err)
-	}
+	// Send JOINRESP message
+	mgr.Transceiver.Transmit(message)
 }
 
 // HandleJoinResponse processes a JOINRESP message
