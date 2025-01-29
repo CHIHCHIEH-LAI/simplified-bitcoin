@@ -11,7 +11,7 @@ import (
 type Node struct {
 	Address            string                          // IP address of the node
 	Port               string                          // Port of the node
-	Tranceiver         *network.Tranceiver             // Tranceiver instance
+	Transceiver        *network.Transceiver            // Tranceiver instance
 	MembershipManager  *membership.MembershipManager   // Membership manager
 	TransactionManager *transaction.TransactionManager // Transaction manager
 }
@@ -21,7 +21,7 @@ func NewNode(address, port string) (*Node, error) {
 	var err error
 
 	// Create a new tranceiver
-	tranceiver, err := network.NewTranceiver(port)
+	transceiver, err := network.NewTransceiver(port)
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func NewNode(address, port string) (*Node, error) {
 	return &Node{
 		Address:            address,
 		Port:               port,
-		Tranceiver:         tranceiver,
+		Transceiver:        transceiver,
 		MembershipManager:  membership.NewMembershipManager(address),
 		TransactionManager: transaction.NewTransactionManager(),
 	}, nil
@@ -38,7 +38,7 @@ func NewNode(address, port string) (*Node, error) {
 // Run starts the P2P node
 func (node *Node) Run(bootstrapNodeAddress string) error {
 	// Run the tranceiver
-	go node.Tranceiver.Run()
+	go node.Transceiver.Run()
 
 	// Start processing messages
 	go node.HandleIncomingMessage()
@@ -59,5 +59,5 @@ func (node *Node) Run(bootstrapNodeAddress string) error {
 // Close closes the P2P node
 func (node *Node) Close() {
 	// Close the tranceiver
-	node.Tranceiver.Close()
+	node.Transceiver.Close()
 }
