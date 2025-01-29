@@ -3,17 +3,17 @@ package network
 import "github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 
 type Tranceiver struct {
-	ReceiverChannel    chan message.Message // Channel to receive messages
-	TransmitterChannel chan message.Message // Channel to transmit messages
-	Receiver           *Receiver            // Receiver instance
-	Transmitter        *Transmitter         // Transmitter instance
+	ReceiverChannel    chan *message.Message // Channel to receive messages
+	TransmitterChannel chan *message.Message // Channel to transmit messages
+	Receiver           *Receiver             // Receiver instance
+	Transmitter        *Transmitter          // Transmitter instance
 }
 
 // NewTranceiver creates a new tranceiver
 func NewTranceiver(port string) (*Tranceiver, error) {
 	tc := &Tranceiver{
-		ReceiverChannel:    make(chan message.Message),
-		TransmitterChannel: make(chan message.Message),
+		ReceiverChannel:    make(chan *message.Message),
+		TransmitterChannel: make(chan *message.Message),
 	}
 
 	var err error
@@ -33,12 +33,12 @@ func (tc *Tranceiver) Run() {
 }
 
 // Transmit sends a message
-func (tc *Tranceiver) Transmit(msg message.Message) {
+func (tc *Tranceiver) Transmit(msg *message.Message) {
 	tc.TransmitterChannel <- msg
 }
 
 // Receive receives a message
-func (tc *Tranceiver) Receive() message.Message {
+func (tc *Tranceiver) Receive() *message.Message {
 	return <-tc.ReceiverChannel
 }
 
