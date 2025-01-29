@@ -21,7 +21,7 @@ func NewNode(address string) *Node {
 		Address:            address,
 		MessageChannel:     make(chan string, 100),
 		MembershipManager:  membership.NewMembershipManager(address),
-		TransactionManager: transaction.NewTransactionManager(address),
+		TransactionManager: transaction.NewTransactionManager(),
 	}
 }
 
