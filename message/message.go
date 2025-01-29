@@ -16,19 +16,21 @@ const (
 )
 
 type Message struct {
-	Type      string `json:"type"`      // Type of the message (e.g. HEARTBEAT, NEWTRANSACTION, etc)
-	Sender    string `json:"sender"`    // Sender of the message
-	Payload   string `json:"payload"`   // Payload of the message (as JSON string)
-	Timestamp int64  `json:"timestamp"` // Timestamp of the message
+	Type       string `json:"type"`       // Type of the message (e.g. HEARTBEAT, NEWTRANSACTION, etc)
+	Sender     string `json:"sender"`     // Sender of the message
+	Receipient string `json:"receipient"` // Receipient of the message
+	Payload    string `json:"payload"`    // Payload of the message (as JSON string)
+	Timestamp  int64  `json:"timestamp"`  // Timestamp of the message
 }
 
 // NewMessage creates a new message
-func NewMessage(msgType, sender, payload string) *Message {
+func NewMessage(msgType, sender, receipient, payload string) *Message {
 	return &Message{
-		Type:      msgType,
-		Sender:    sender,
-		Payload:   payload,
-		Timestamp: utils.GetCurrentTimeInUnix(),
+		Type:       msgType,
+		Sender:     sender,
+		Receipient: receipient,
+		Payload:    payload,
+		Timestamp:  utils.GetCurrentTimeInUnix(),
 	}
 }
 

@@ -10,30 +10,35 @@ import (
 
 type Node struct {
 	Address            string                          // IP address of the node
-	MessageChannel     chan string                     // Channel to send and receive messages
+	Port               string                          // Port of the node
+	Tranceiver         *network.Tranceiver             // Tranceiver instance
 	MembershipManager  *membership.MembershipManager   // Membership manager
 	TransactionManager *transaction.TransactionManager // Transaction manager
 }
 
 // NewNode creates a new P2P node
-func NewNode(address string) *Node {
+func NewNode(address, port string) (*Node, error) {
+	var err error
+
+	// Create a new tranceiver
+	tranceiver, err := network.NewTranceiver(port)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Node{
 		Address:            address,
-		MessageChannel:     make(chan string, 100),
+		Port:               port,
+		Tranceiver:         tranceiver,
 		MembershipManager:  membership.NewMembershipManager(address),
 		TransactionManager: transaction.NewTransactionManager(),
-	}
+	}, nil
 }
 
 // Run starts the P2P node
-func (node *Node) Run(port string, bootstrapNodeAddress string) error {
-	// Run the communication listener
-	go func() {
-		err := network.RunListener(port, node.MessageChannel)
-		if err != nil {
-			log.Fatalf("Failed to start listener on port %s: %v", port, err)
-		}
-	}()
+func (node *Node) Run(bootstrapNodeAddress string) error {
+	// Run the tranceiver
+	go node.Tranceiver.Run()
 
 	// Start processing messages
 	go node.HandleIncomingMessage()
@@ -49,4 +54,10 @@ func (node *Node) Run(port string, bootstrapNodeAddress string) error {
 	go node.MembershipManager.MaintainMembership()
 
 	return nil
+}
+
+// Close closes the P2P node
+func (node *Node) Close() {
+	// Close the tranceiver
+	node.Tranceiver.Close()
 }
