@@ -2,8 +2,10 @@ package node
 
 import (
 	"log"
+	"math"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/membership"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/transaction"
 )
@@ -40,8 +42,8 @@ func (node *Node) Run(bootstrapNodeAddress string) error {
 	// Run the tranceiver
 	go node.Transceiver.Run()
 
-	// Start processing messages
-	go node.HandleIncomingMessage()
+	// Handle incoming messages
+	go node.handleIncomingMessage()
 
 	// Join the p2p network
 	err := node.MembershipManager.JoinGroup(bootstrapNodeAddress)
@@ -52,6 +54,52 @@ func (node *Node) Run(bootstrapNodeAddress string) error {
 
 	// Start maintaining membership
 	go node.MembershipManager.MaintainMembership()
+
+	return nil
+}
+
+// HandleIncomingMessage processes incoming messages
+func (node *Node) handleIncomingMessage() {
+	for {
+		msg, ok := node.Transceiver.Receive()
+		if !ok {
+			continue // Skip iteration if no message
+		}
+
+		// Process the message based on its type
+		switch msg.Type {
+		case message.JOINREQ:
+			node.MembershipManager.HandleJoinRequest(msg)
+		case message.JOINRESP:
+			node.MembershipManager.HandleJoinResponse(msg)
+		case message.HEARTBEAT:
+			node.MembershipManager.HandleHeartbeat(msg)
+		case message.NEWTRANSACTION:
+			node.gossipMessage(msg)
+			node.TransactionManager.HandleNewTransaction(msg)
+		// case message.NEWBLOCK:
+		// 	node.HandleNewBlock(msg)
+		// case "GETBLOCKCHAIN":
+		// 	node.HandleGetBlockchain(msg)
+		default:
+			log.Printf("Unknown message type: %s\n", msg.Type)
+		}
+	}
+}
+
+// GossipMessage sends a message to N random members
+func (node *Node) gossipMessage(msg *message.Message) error {
+
+	// Select N random members to send the message to
+	n_members := len(node.MembershipManager.MemberList.Members)
+	n_targetMember := int(math.Sqrt(float64(n_members)))
+	selectedMembers := node.MembershipManager.SelectNMembers(n_targetMember)
+
+	// Send the message to the selected members
+	for _, member := range selectedMembers {
+		msg.Receipient = member.Address
+		node.Transceiver.Transmit(msg)
+	}
 
 	return nil
 }
