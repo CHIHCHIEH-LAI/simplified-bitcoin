@@ -9,12 +9,12 @@ import (
 )
 
 type Receiver struct {
-	Listener       net.Listener           // Listener to accept incoming connections
-	MessageChannel chan<- message.Message // Channel to send received messages
+	Listener       net.Listener            // Listener to accept incoming connections
+	MessageChannel chan<- *message.Message // Channel to send received messages
 }
 
 // NewReceiver creates a new Receiver instance
-func NewReceiver(port string, messageChannel chan<- message.Message) (*Receiver, error) {
+func NewReceiver(port string, messageChannel chan<- *message.Message) (*Receiver, error) {
 	// Start listening on the specified port
 	listener, err := net.Listen("tcp", ":"+port)
 	if err != nil {
@@ -66,7 +66,7 @@ func (r *Receiver) handleConnection(conn net.Conn) {
 	log.Printf("Received message: %s\n", msgData)
 
 	// Send the message to the message channel
-	r.MessageChannel <- *msg
+	r.MessageChannel <- msg
 }
 
 // Close closes the receiver
