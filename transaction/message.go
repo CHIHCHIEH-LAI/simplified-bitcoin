@@ -15,6 +15,7 @@ func NewMessage(sender string, tx *Transaction) (*message.Message, error) {
 	return message.NewMessage(
 		message.NEWTRANSACTION,
 		sender,
+		"",
 		txData,
 	), nil
 }
