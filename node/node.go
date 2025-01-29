@@ -3,8 +3,8 @@ package node
 import (
 	"fmt"
 	"log"
-	"math"
 
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/gossip"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/membership"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
@@ -16,6 +16,7 @@ type Node struct {
 	Port               string                          // Port of the node
 	Transceiver        *network.Transceiver            // Tranceiver instance
 	MembershipManager  *membership.MembershipManager   // Membership manager
+	GossipManager      *gossip.GossipManager           // Gossip manager
 	TransactionManager *transaction.TransactionManager // Transaction manager
 }
 
@@ -29,11 +30,15 @@ func NewNode(address, port string) (*Node, error) {
 		return nil, err
 	}
 
+	// Create a new membership manager
+	membershipManager := membership.NewMembershipManager(address, transceiver)
+
 	return &Node{
 		Address:            address,
 		Port:               port,
 		Transceiver:        transceiver,
-		MembershipManager:  membership.NewMembershipManager(address, transceiver),
+		MembershipManager:  membershipManager,
+		GossipManager:      gossip.NewGossipManager(transceiver, membershipManager),
 		TransactionManager: transaction.NewTransactionManager(),
 	}, nil
 }
@@ -75,7 +80,7 @@ func (node *Node) handleIncomingMessage() {
 		case message.HEARTBEAT:
 			node.MembershipManager.HandleHeartbeat(msg)
 		case message.NEWTRANSACTION:
-			node.gossipMessage(msg)
+			node.GossipManager.Gossip(msg)
 			node.TransactionManager.HandleNewTransaction(msg)
 		// case message.NEWBLOCK:
 		// 	node.HandleNewBlock(msg)
@@ -85,23 +90,6 @@ func (node *Node) handleIncomingMessage() {
 			log.Printf("Unknown message type: %s\n", msg.Type)
 		}
 	}
-}
-
-// GossipMessage sends a message to N random members
-func (node *Node) gossipMessage(msg *message.Message) error {
-
-	// Select N random members to send the message to
-	n_members := len(node.MembershipManager.MemberList.Members)
-	n_targetMember := int(math.Sqrt(float64(n_members)))
-	selectedMembers := node.MembershipManager.SelectNMembers(n_targetMember)
-
-	// Send the message to the selected members
-	for _, member := range selectedMembers {
-		msg.Receipient = member.Address
-		node.Transceiver.Transmit(msg)
-	}
-
-	return nil
 }
 
 // Close closes the P2P node
