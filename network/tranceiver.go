@@ -32,6 +32,16 @@ func (tc *Tranceiver) Run() {
 	go tc.Transmitter.Run()
 }
 
+// Transmit sends a message
+func (tc *Tranceiver) Transmit(msg message.Message) {
+	tc.TransmitterChannel <- msg
+}
+
+// Receive receives a message
+func (tc *Tranceiver) Receive() message.Message {
+	return <-tc.ReceiverChannel
+}
+
 // Close closes the tranceiver
 func (tc *Tranceiver) Close() {
 	close(tc.ReceiverChannel)
