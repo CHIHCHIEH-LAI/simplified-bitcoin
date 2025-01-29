@@ -2,6 +2,7 @@ package membership
 
 import (
 	"log"
+	"math"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
@@ -53,7 +54,8 @@ func (mgr *MembershipManager) GossipHeartbeat() {
 	}
 
 	// Select some random members to send the HEARTBEAT message
-	selectedMembers := mgr.SelectNMembers(NUMMEMBERSTOHEARTBEAT)
+	n_target := int(math.Sqrt(float64(len(mgr.MemberList.Members))))
+	selectedMembers := mgr.SelectNMembers(n_target)
 
 	// Send HEARTBEAT message to some random members in the network
 	for _, address := range selectedMembers {
