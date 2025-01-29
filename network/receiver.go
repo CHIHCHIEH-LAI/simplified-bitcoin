@@ -56,13 +56,14 @@ func (r *Receiver) handleConnection(conn net.Conn) {
 		return
 	}
 
-	// Deserialize the received message data
-	data := string(buffer[:n])
-	msg, err := message.DeserializeMessage(data)
+	// Deserialize the message
+	msgData := string(buffer[:n])
+	msg, err := message.DeserializeMessage(msgData)
 	if err != nil {
 		log.Printf("Failed to deserialize message: %v\n", err)
 		return
 	}
+	log.Printf("Received message: %s\n", msgData)
 
 	// Send the message to the message channel
 	r.MessageChannel <- *msg
