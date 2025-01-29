@@ -9,11 +9,11 @@ import (
 )
 
 type Transmitter struct {
-	MessageChannel <-chan message.Message // Channel to transmit messages
+	MessageChannel <-chan *message.Message // Channel to transmit messages
 }
 
 // NewTransmitter creates a new Transmitter instance
-func NewTransmitter(messageChannel <-chan message.Message) *Transmitter {
+func NewTransmitter(messageChannel <-chan *message.Message) *Transmitter {
 	return &Transmitter{
 		MessageChannel: messageChannel,
 	}
@@ -27,7 +27,7 @@ func (t *Transmitter) Run() {
 }
 
 // sendMessage sends a message to the specified address
-func (t *Transmitter) sendMessage(msg message.Message) {
+func (t *Transmitter) sendMessage(msg *message.Message) {
 	// Establish a connection to the remote address
 	conn, err := t.establishConnection(msg.Receipient)
 	if err != nil {
