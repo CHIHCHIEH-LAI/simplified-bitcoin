@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/utils"
 )
 
@@ -26,7 +25,7 @@ func NewTransactionManager(address string) *TransactionManager {
 	}
 }
 
-func (mgr *TransactionManager) HandleNewTransaction(msg *message.Message, selectedMembers []string) {
+func (mgr *TransactionManager) HandleNewTransaction(msg *message.Message) {
 	// Check if the transaction is stale
 	if math.Abs(float64(msg.Timestamp-utils.GetCurrentTimeInUnix())) > TIME_VALID_TX_THRESHOLD {
 		log.Printf("Received stale transaction message\n")
@@ -48,10 +47,6 @@ func (mgr *TransactionManager) HandleNewTransaction(msg *message.Message, select
 
 	// Add the transaction to the pool
 	mgr.AddTransaction(tx)
-
-	// Broadcast the transaction to the network
-	mgr.BroadcastTransaction(tx, selectedMembers)
-
 }
 
 // AddTransaction adds a transaction to the pool
@@ -63,29 +58,6 @@ func (mgr *TransactionManager) AddTransaction(tx *Transaction) error {
 		return fmt.Errorf("Transaction with ID %s already exists", tx.TransactionID)
 	}
 	mgr.TransactionPool[tx.TransactionID] = tx
-	return nil
-}
-
-// BroadcastTransaction broadcasts a transaction to the network
-func (mgr *TransactionManager) BroadcastTransaction(tx *Transaction, selectedMembers []string) error {
-	// Create and serialize a new transaction message
-	msg, err := NewMessage(mgr.Sender, tx)
-	if err != nil {
-		return fmt.Errorf("failed to create transaction message: %v", err)
-	}
-
-	messageData, err := msg.Serialize()
-	if err != nil {
-		return fmt.Errorf("failed to serialize transaction message: %v", err)
-	}
-
-	// Broadcast the message to the network
-	for _, address := range selectedMembers {
-		err := network.SendMessageData(address, messageData)
-		if err != nil {
-			log.Printf("Failed to send HEARTBEAT message: %v\n", err)
-		}
-	}
 	return nil
 }
 
