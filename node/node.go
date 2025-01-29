@@ -10,12 +10,12 @@ import (
 )
 
 type Node struct {
-	Address            string                          // IP address of the node
-	Port               string                          // Port of the node
-	Transceiver        *network.Transceiver            // Tranceiver instance
-	MembershipManager  *membership.MembershipManager   // Membership manager
-	GossipManager      *GossipManager                  // Gossip manager
-	TransactionManager *transaction.TransactionManager // Transaction manager
+	Address           string                        // IP address of the node
+	Port              string                        // Port of the node
+	Transceiver       *network.Transceiver          // Tranceiver instance
+	MembershipManager *membership.MembershipManager // Membership manager
+	GossipManager     *GossipManager                // Gossip manager
+	Mempool           *transaction.Mempool          // Transaction manager
 }
 
 // NewNode creates a new P2P node
@@ -32,12 +32,12 @@ func NewNode(address, port string) (*Node, error) {
 	membershipManager := membership.NewMembershipManager(address, transceiver)
 
 	return &Node{
-		Address:            address,
-		Port:               port,
-		Transceiver:        transceiver,
-		MembershipManager:  membershipManager,
-		GossipManager:      NewGossipManager(transceiver, membershipManager),
-		TransactionManager: transaction.NewTransactionManager(),
+		Address:           address,
+		Port:              port,
+		Transceiver:       transceiver,
+		MembershipManager: membershipManager,
+		GossipManager:     NewGossipManager(transceiver, membershipManager),
+		Mempool:           transaction.NewMempool(),
 	}, nil
 }
 
@@ -76,7 +76,7 @@ func (node *Node) handleIncomingMessage() {
 			node.MembershipManager.HandleHeartbeat(msg)
 		case message.NEWTRANSACTION:
 			node.GossipManager.Gossip(msg)
-			node.TransactionManager.HandleNewTransaction(msg)
+			node.Mempool.HandleNewTransaction(msg)
 		// case message.NEWBLOCK:
 		// 	node.HandleNewBlock(msg)
 		// case "GETBLOCKCHAIN":
