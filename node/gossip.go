@@ -1,4 +1,4 @@
-package gossip
+package node
 
 import (
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/membership"

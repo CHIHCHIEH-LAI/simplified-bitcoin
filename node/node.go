@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/gossip"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/membership"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
@@ -16,7 +15,7 @@ type Node struct {
 	Port               string                          // Port of the node
 	Transceiver        *network.Transceiver            // Tranceiver instance
 	MembershipManager  *membership.MembershipManager   // Membership manager
-	GossipManager      *gossip.GossipManager           // Gossip manager
+	GossipManager      *GossipManager                  // Gossip manager
 	TransactionManager *transaction.TransactionManager // Transaction manager
 }
 
@@ -38,7 +37,7 @@ func NewNode(address, port string) (*Node, error) {
 		Port:               port,
 		Transceiver:        transceiver,
 		MembershipManager:  membershipManager,
-		GossipManager:      gossip.NewGossipManager(transceiver, membershipManager),
+		GossipManager:      NewGossipManager(transceiver, membershipManager),
 		TransactionManager: transaction.NewTransactionManager(),
 	}, nil
 }
