@@ -58,9 +58,9 @@ func (mgr *MembershipManager) GossipHeartbeat() {
 	selectedMembers := mgr.SelectNMembers(n_target)
 
 	// Send HEARTBEAT message to some random members in the network
-	for _, address := range selectedMembers {
+	for _, member := range selectedMembers {
 		// Send HEARTBEAT message to the member
-		err := network.SendMessageData(address, messageData)
+		err := network.SendMessageData(member.Address, messageData)
 		if err != nil {
 			log.Printf("Failed to send HEARTBEAT message: %v\n", err)
 		}

@@ -36,7 +36,7 @@ func (node *Node) Run(port string, bootstrapNodeAddress string) error {
 	}()
 
 	// Start processing messages
-	go node.HandleMessage()
+	go node.HandleIncomingMessage()
 
 	// Join the p2p network
 	err := node.MembershipManager.JoinGroup(bootstrapNodeAddress)
