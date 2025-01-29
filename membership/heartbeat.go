@@ -5,7 +5,6 @@ import (
 	"math"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/utils"
 )
 
@@ -47,11 +46,6 @@ func (mgr *MembershipManager) GossipHeartbeat() {
 	}
 
 	message := NewHEARTBEATMessage(mgr.Address, payload)
-	messageData, err := message.Serialize()
-	if err != nil {
-		log.Printf("Failed to serialize HEARTBEAT message: %v\n", err)
-		return
-	}
 
 	// Select some random members to send the HEARTBEAT message
 	n_target := int(math.Sqrt(float64(len(mgr.MemberList.Members))))
@@ -60,9 +54,7 @@ func (mgr *MembershipManager) GossipHeartbeat() {
 	// Send HEARTBEAT message to some random members in the network
 	for _, member := range selectedMembers {
 		// Send HEARTBEAT message to the member
-		err := network.SendMessageData(member.Address, messageData)
-		if err != nil {
-			log.Printf("Failed to send HEARTBEAT message: %v\n", err)
-		}
+		message.Receipient = member.Address
+		mgr.Transceiver.Transmit(message)
 	}
 }
