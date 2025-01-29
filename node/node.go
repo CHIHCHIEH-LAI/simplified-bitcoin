@@ -1,6 +1,7 @@
 package node
 
 import (
+	"fmt"
 	"log"
 	"math"
 
@@ -48,8 +49,7 @@ func (node *Node) Run(bootstrapNodeAddress string) error {
 	// Join the p2p network
 	err := node.MembershipManager.JoinGroup(bootstrapNodeAddress)
 	if err != nil {
-		log.Printf("Failed to join network via bootstrap node %s: %v", bootstrapNodeAddress, err)
-		return err
+		return fmt.Errorf("failed to join network via bootstrap node %s: %v", bootstrapNodeAddress, err)
 	}
 
 	// Start maintaining membership
