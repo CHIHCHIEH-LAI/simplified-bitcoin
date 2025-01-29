@@ -9,8 +9,8 @@ import (
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
 )
 
-// HandleMessage processes incoming messages
-func (node *Node) HandleMessage() {
+// HandleIncomingMessage processes incoming messages
+func (node *Node) HandleIncomingMessage() {
 	for msgData := range node.MessageChannel {
 		log.Printf("Received message: %s\n", msgData)
 
