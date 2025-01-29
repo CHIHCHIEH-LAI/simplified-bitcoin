@@ -30,7 +30,7 @@ func (node *Node) HandleIncomingMessage() {
 		case message.HEARTBEAT:
 			node.MembershipManager.HandleHeartbeat(msg)
 		case message.NEWTRANSACTION:
-			go node.BroadcastMessage(msg)
+			go node.GossipMessage(msg)
 			node.TransactionManager.HandleNewTransaction(msg)
 		// case message.NEWBLOCK:
 		// 	node.HandleNewBlock(msg)
@@ -42,8 +42,8 @@ func (node *Node) HandleIncomingMessage() {
 	}
 }
 
-// BroadcastMessage broadcasts a message to N random members
-func (node *Node) BroadcastMessage(msg *message.Message) error {
+// GossipMessage sends a message to N random members
+func (node *Node) GossipMessage(msg *message.Message) error {
 	msgData, err := msg.Serialize()
 	if err != nil {
 		return fmt.Errorf("failed to serialize message: %v", err)
