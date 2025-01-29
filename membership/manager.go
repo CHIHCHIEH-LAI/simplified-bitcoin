@@ -32,6 +32,10 @@ func (mgr *MembershipManager) MaintainMembership() {
 	}
 }
 
+func (mgr *MembershipManager) GetNumberOfMembers() int {
+	return len(mgr.MemberList.Members)
+}
+
 // SelectMembers selects n_member random members from the member list
 func (mgr *MembershipManager) SelectNMembers(n_target int) []*Member {
 	selectedMembers := make(map[int]bool)
