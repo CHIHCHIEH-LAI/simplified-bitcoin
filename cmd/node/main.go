@@ -25,9 +25,6 @@ func main() {
 	// Parse command-line flags
 	flag.Parse()
 
-	// Parse flags
-	flag.Parse()
-
 	// Start the node
 	startNode()
 }
@@ -42,14 +39,14 @@ func startNode() {
 	}
 
 	// Create a new P2P node
-	node := node.NewNode(address)
+	node, err := node.NewNode(address, port)
+	if err != nil {
+		log.Fatalf("Failed to create node: %v\n", err)
+	}
 
 	// Start the node
 	log.Printf("Starting node at %s...\n", address)
-	err := node.Run(port, bootstrapNodeAddr)
-	if err != nil {
-		log.Fatalf("Failed to start node: %v\n", err)
-	}
+	node.Run(bootstrapNodeAddr)
 
 	// Keep the server running
 	select {}
