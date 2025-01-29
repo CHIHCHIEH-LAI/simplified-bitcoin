@@ -43,7 +43,7 @@ func NewNode(address, port string) (*Node, error) {
 }
 
 // Run starts the P2P node
-func (node *Node) Run(bootstrapNodeAddress string) error {
+func (node *Node) Run(bootstrapNodeAddr string) error {
 	// Run the tranceiver
 	go node.Transceiver.Run()
 
@@ -51,9 +51,9 @@ func (node *Node) Run(bootstrapNodeAddress string) error {
 	go node.handleIncomingMessage()
 
 	// Join the p2p network
-	err := node.MembershipManager.JoinGroup(bootstrapNodeAddress)
+	err := node.MembershipManager.JoinGroup(bootstrapNodeAddr)
 	if err != nil {
-		return fmt.Errorf("failed to join network via bootstrap node %s: %v", bootstrapNodeAddress, err)
+		return fmt.Errorf("failed to join network via bootstrap node %s: %v", bootstrapNodeAddr, err)
 	}
 
 	// Start maintaining membership
