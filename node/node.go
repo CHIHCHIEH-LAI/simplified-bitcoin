@@ -1,7 +1,6 @@
 package node
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/membership"
@@ -50,14 +49,11 @@ func (node *Node) Run(bootstrapNodeAddr string) error {
 	// Handle incoming messages
 	go node.handleIncomingMessage()
 
-	// Join the p2p network
-	err := node.MembershipManager.JoinGroup(bootstrapNodeAddr)
-	if err != nil {
-		return fmt.Errorf("failed to join network via bootstrap node %s: %v", bootstrapNodeAddr, err)
-	}
+	// Run the membership manager
+	go node.MembershipManager.Run(bootstrapNodeAddr)
 
-	// Start maintaining membership
-	go node.MembershipManager.MaintainMembership()
+	// Start the gossip manager
+	go node.GossipManager.Run(60)
 
 	return nil
 }
@@ -95,4 +91,7 @@ func (node *Node) handleIncomingMessage() {
 func (node *Node) Close() {
 	// Close the tranceiver
 	node.Transceiver.Close()
+
+	// Close the gossip manager
+	node.GossipManager.Close()
 }

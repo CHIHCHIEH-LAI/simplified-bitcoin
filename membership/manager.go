@@ -22,8 +22,11 @@ func NewMembershipManager(address string, transceiver *network.Transceiver) *Mem
 	}
 }
 
-// MaintainMembership maintains the membership list by sending heartbeats
-func (mgr *MembershipManager) MaintainMembership() {
+// Run starts the membership manager
+func (mgr *MembershipManager) Run(bootstrapNodeAddr string) {
+	// Join the p2p network
+	mgr.JoinGroup(bootstrapNodeAddr)
+
 	for {
 		mgr.MemberList.UpdateSelfInMemberList(mgr.Address)
 		mgr.MemberList.RemoveFailedMembers()

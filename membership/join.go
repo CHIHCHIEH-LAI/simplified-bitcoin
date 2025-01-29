@@ -8,11 +8,11 @@ import (
 )
 
 // JoinGroup joins the P2P group via the bootstrap node
-func (mgr *MembershipManager) JoinGroup(bootstrapNodeAddress string) error {
+func (mgr *MembershipManager) JoinGroup(bootstrapNodeAddress string) {
 	// Introduce self to the group if bootstrap node is self
 	if bootstrapNodeAddress == "" || bootstrapNodeAddress == mgr.Address {
 		mgr.IntroduceSelfToGroup()
-		return nil
+		return
 	}
 
 	// Create a JOINREQ message
@@ -20,8 +20,6 @@ func (mgr *MembershipManager) JoinGroup(bootstrapNodeAddress string) error {
 
 	// Send JOINREQ message
 	mgr.Transceiver.Transmit(message)
-
-	return nil
 }
 
 // IntroduceSelfToGroup sends a JOINREQ message to the bootstrap node
