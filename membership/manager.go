@@ -30,7 +30,7 @@ func (mgr *MembershipManager) MaintainMembership() {
 }
 
 // SelectMembers selects n_member random members from the member list
-func (mgr *MembershipManager) SelectNMembers(n_target int) []string {
+func (mgr *MembershipManager) SelectNMembers(n_target int) []*Member {
 	selectedMembers := make(map[int]bool)
 	limit := min(n_target, len(mgr.MemberList.Members)-1)
 
@@ -51,9 +51,9 @@ func (mgr *MembershipManager) SelectNMembers(n_target int) []string {
 	}
 
 	// Convert the selected members to a slice
-	selectedMembersSlice := make([]string, 0)
+	selectedMembersSlice := make([]*Member, 0)
 	for index := range selectedMembers {
-		selectedMembersSlice = append(selectedMembersSlice, mgr.MemberList.Members[index].Address)
+		selectedMembersSlice = append(selectedMembersSlice, mgr.MemberList.Members[index])
 	}
 
 	return selectedMembersSlice
