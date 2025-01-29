@@ -31,8 +31,8 @@ func (mgr *MembershipManager) HandleHeartbeat(msg *message.Message) {
 	mgr.MemberList.UpdateMemberList(memberList, mgr.Address)
 }
 
-// SendHeartbeat sends a heartbeat message to some random members in the network
-func (mgr *MembershipManager) SendHeartbeat() {
+// GossipHeartbeat sends a HEARTBEAT message to some random members in the network
+func (mgr *MembershipManager) GossipHeartbeat() {
 	// Skip if there is only one member in the network
 	if len(mgr.MemberList.Members) == 1 {
 		return

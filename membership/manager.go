@@ -24,7 +24,7 @@ func (mgr *MembershipManager) MaintainMembership() {
 	for {
 		mgr.MemberList.UpdateSelfInMemberList(mgr.Address)
 		mgr.MemberList.RemoveFailedMembers()
-		mgr.SendHeartbeat()
+		mgr.GossipHeartbeat()
 		time.Sleep(TIMEHEARTBEAT * time.Second)
 	}
 }
