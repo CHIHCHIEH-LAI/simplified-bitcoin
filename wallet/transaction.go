@@ -35,7 +35,7 @@ func (w *Wallet) SendTransaction(tx *transaction.Transaction, selfAddress string
 	}
 
 	// Send the message to the node
-	w.Transmitter.Transmit(message)
+	w.Transmitter.SendMessage(message)
 
 	return nil
 }
