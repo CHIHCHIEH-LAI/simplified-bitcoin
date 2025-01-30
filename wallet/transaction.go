@@ -22,23 +22,20 @@ func (w *Wallet) CreateTransaction(recipient string, amount float64, fee float64
 	return tx, nil
 }
 
-// // SendTransaction sends a transaction to a node in the network
-// func SendTransaction(tx *transaction.Transaction, selfAddress string, nodeAddress string) error {
-// 	// Create and serialize the mwssage
-// 	message, err := transaction.NewMessage(
-// 		selfAddress,
-// 		nodeAddress,
-// 		tx,
-// 	)
-// 	if err != nil {
-// 		return fmt.Errorf("failed to create transaction message: %v", err)
-// 	}
+// SendTransaction sends a transaction to a node in the network
+func (w *Wallet) SendTransaction(tx *transaction.Transaction, selfAddress string, nodeAddress string) error {
+	// Create and serialize the mwssage
+	message, err := transaction.NewMessage(
+		selfAddress,
+		nodeAddress,
+		tx,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create transaction message: %v", err)
+	}
 
-// 	// Send the message to the node
-// 	err = network.SendMessage(message)
-// 	if err != nil {
-// 		return err
-// 	}
+	// Send the message to the node
+	w.Transmitter.SendMessage(message)
 
-// 	return nil
-// }
+	return nil
+}

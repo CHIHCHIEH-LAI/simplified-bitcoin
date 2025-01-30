@@ -74,9 +74,9 @@ func createTransaction() {
 	}
 	fmt.Printf("Transaction created!\nID: %s\n", tx.TransactionID)
 
-	// // Send the transaction to the network
-	// err = wallet.SendTransaction(tx, address, bootstrapNodeAddr)
-	// if err != nil {
-	// 	log.Fatalf("Failed to send transaction: %v\n", err)
-	// }
+	// Send the transaction to the network
+	err = w.SendTransaction(tx, address, bootstrapNodeAddr)
+	if err != nil {
+		log.Fatalf("Failed to send transaction: %v\n", err)
+	}
 }

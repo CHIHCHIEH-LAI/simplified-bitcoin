@@ -22,7 +22,7 @@ func NewTransmitter(messageChannel chan *message.Message) *Transmitter {
 // Run runs the transmitter
 func (t *Transmitter) Run() {
 	for msg := range t.MessageChannel {
-		t.sendMessage(msg)
+		t.SendMessage(msg)
 	}
 }
 
@@ -32,7 +32,7 @@ func (t *Transmitter) Transmit(msg *message.Message) {
 }
 
 // sendMessage sends a message to the specified address
-func (t *Transmitter) sendMessage(msg *message.Message) {
+func (t *Transmitter) SendMessage(msg *message.Message) {
 	// Establish a connection to the remote address
 	conn, err := t.establishConnection(msg.Receipient)
 	if err != nil {
