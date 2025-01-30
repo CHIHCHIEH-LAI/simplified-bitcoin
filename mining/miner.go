@@ -10,7 +10,7 @@ import (
 
 type Miner struct {
 	Address      string                     // Address of the miner
-	Transactions []*transaction.Transaction // Reference to the transaction pool
+	Transactions []*transaction.Transaction // Reference to the transactions
 	Blockchain   *blockchain.Blockchain     // Reference to the blockchain
 	Difficulty   int                        // Difficulty of the mining process
 	StopMining   chan bool                  // Channel to stop the mining process
