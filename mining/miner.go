@@ -25,13 +25,13 @@ func NewMiner(address string, blockchain *blockchain.Blockchain) *Miner {
 }
 
 // StartMining starts the mining process with the given miner address
-func (miner *Miner) Start(transactions []*transaction.Transaction, reward float64, difficulty int) {
+func (miner *Miner) Start(transactions []*transaction.Transaction, reward float64, difficulty int) *blockchain.Block {
 	log.Println("Starting mining process...")
 
 	// Skip mining process if the transaction pool is empty
 	if len(transactions) == 0 {
 		log.Println("Transactions is empty. Skipping mining process...")
-		return
+		return nil
 	}
 
 	// Create a new block with the miner's address and reward
@@ -41,11 +41,13 @@ func (miner *Miner) Start(transactions []*transaction.Transaction, reward float6
 	miner.StopMining <- false
 
 	// Perform the proof of work algorithm
-	miner.PerformProofOfWork(newBlock)
+	minedBlock := miner.PerformProofOfWork(newBlock)
+
+	return minedBlock
 }
 
 // PerformProofOfWork performs the proof of work algorithm
-func (miner *Miner) PerformProofOfWork(block *blockchain.Block) {
+func (miner *Miner) PerformProofOfWork(block *blockchain.Block) *blockchain.Block {
 	log.Printf("Mining block %s with difficulty %d...\n", block.BlockID, miner.Difficulty)
 
 	prefix := strings.Repeat("0", miner.Difficulty)
@@ -54,7 +56,7 @@ func (miner *Miner) PerformProofOfWork(block *blockchain.Block) {
 		case <-miner.StopMining:
 			// Stop the mining process
 			log.Println("Mining process terminated.")
-			return
+			return nil
 		default:
 			// Continue the mining process
 			blockHash := block.Hash()
@@ -62,7 +64,7 @@ func (miner *Miner) PerformProofOfWork(block *blockchain.Block) {
 				log.Printf("Block mined: %s\n", blockHash)
 				block.BlockID = blockHash
 				miner.Blockchain.AddBlock(block)
-				return
+				return block
 			}
 			block.Nonce++
 		}
