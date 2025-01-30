@@ -6,18 +6,24 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
 )
 
 type Wallet struct {
-	PrivateKey *ecdsa.PrivateKey `json:"-"`
-	PublicKey  []byte            `json:"public_key"`
+	PrivateKey  *ecdsa.PrivateKey `json:"-"`
+	PublicKey   []byte            `json:"public_key"`
+	Transmitter *network.Transmitter
 }
 
 // NewWallet creates and returns a Wallet
 func NewWallet() *Wallet {
 	privateKey, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	publicKey := append(privateKey.PublicKey.X.Bytes(), privateKey.PublicKey.Y.Bytes()...)
-	return &Wallet{privateKey, publicKey}
+	messageChannel := make(chan *message.Message)
+	transmitter := network.NewTransmitter(messageChannel)
+	return &Wallet{privateKey, publicKey, transmitter}
 }
 
 // GetAddress generates a public key hash (address) for the wallet
