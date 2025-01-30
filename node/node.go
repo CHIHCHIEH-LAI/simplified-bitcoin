@@ -5,9 +5,9 @@ import (
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/gossip"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/membership"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/mempool"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/transaction"
 )
 
 type Node struct {
@@ -16,7 +16,7 @@ type Node struct {
 	Transceiver       *network.Transceiver          // Tranceiver instance
 	MembershipManager *membership.MembershipManager // Membership manager
 	GossipManager     *gossip.GossipManager         // Gossip manager
-	Mempool           *transaction.Mempool          // Transaction manager
+	Mempool           *mempool.Mempool              // Transaction manager
 }
 
 // NewNode creates a new P2P node
@@ -38,7 +38,7 @@ func NewNode(address, port string) (*Node, error) {
 		Transceiver:       transceiver,
 		MembershipManager: membershipManager,
 		GossipManager:     gossip.NewGossipManager(transceiver, membershipManager),
-		Mempool:           transaction.NewMempool(),
+		Mempool:           mempool.NewMempool(),
 	}, nil
 }
 
