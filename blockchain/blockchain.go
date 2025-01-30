@@ -19,8 +19,8 @@ func NewBlockchain() *Blockchain {
 }
 
 // NewBlock creates a new block with the given transactions
-func (bc *Blockchain) NewBlock(transactions []*transaction.Transaction, miner string, reward float64) *Block {
-	return NewBlock(bc.GetLatestBlock().BlockID, transactions, miner, reward)
+func (bc *Blockchain) NewBlock(transactions []*transaction.Transaction, miner string, reward float64, difficulty int) *Block {
+	return NewBlock(bc.GetLatestBlock().BlockID, transactions, miner, reward, difficulty)
 }
 
 // AddBlock adds a new block to the blockchain

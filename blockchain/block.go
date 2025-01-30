@@ -14,12 +14,13 @@ type Block struct {
 	MerkleRoot   string                     `json:"merkle_root"`  // Merkle root of the transactions
 	Timestamp    int64                      `json:"timestamp"`    // Unix timestamp
 	Nonce        int                        `json:"nonce"`        // Proof of work
+	Difficulty   int                        `json:"difficulty"`   // Difficulty of the block
 	Transactions []*transaction.Transaction `json:"transactions"` // List of transactions
 }
 
 // Hash returns the hash of the block
 func (b *Block) Hash() string {
-	data := fmt.Sprintf("%s%s%d%d", b.PrevHash, b.MerkleRoot, b.Timestamp, b.Nonce)
+	data := fmt.Sprintf("%s%s%d%d%d", b.PrevHash, b.MerkleRoot, b.Timestamp, b.Nonce, b.Difficulty)
 	return utils.Hash(data)
 }
 
@@ -29,7 +30,7 @@ func (b *Block) GenerateBlockID() string {
 }
 
 // NewBlock creates a new block with the given previous hash and transactions
-func NewBlock(prevHash string, transactions []*transaction.Transaction, miner string, reward float64) *Block {
+func NewBlock(prevHash string, transactions []*transaction.Transaction, miner string, reward float64, difficulty int) *Block {
 	// Create a coinbase transaction to reward the miner
 	coinbaseTx := transaction.NewCoinbaseTransaction(miner, reward)
 	transactions = append([]*transaction.Transaction{coinbaseTx}, transactions...)
@@ -42,6 +43,7 @@ func NewBlock(prevHash string, transactions []*transaction.Transaction, miner st
 		MerkleRoot:   merkleRoot,
 		Timestamp:    0,
 		Nonce:        0,
+		Difficulty:   difficulty,
 		Transactions: transactions,
 	}
 	block.BlockID = block.GenerateBlockID()
@@ -50,7 +52,7 @@ func NewBlock(prevHash string, transactions []*transaction.Transaction, miner st
 
 // NewGenesisBlock creates the first block in the blockchain
 func NewGenesisBlock() *Block {
-	return NewBlock("", nil, "", 0)
+	return NewBlock("", nil, "", 0, 0)
 }
 
 // ValidateBlockID validates the block ID
