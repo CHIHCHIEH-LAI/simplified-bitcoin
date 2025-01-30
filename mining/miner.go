@@ -10,7 +10,7 @@ import (
 
 type Miner struct {
 	Address      string                     // Address of the miner
-	Transactions []*transaction.Transaction // Reference to the transaction pool
+	Transactions []*transaction.Transaction // Reference to the transactions
 	Blockchain   *blockchain.Blockchain     // Reference to the blockchain
 	Difficulty   int                        // Difficulty of the mining process
 	StopMining   chan bool                  // Channel to stop the mining process
@@ -28,7 +28,7 @@ func NewMiner(address string, transactions []*transaction.Transaction, blockchai
 }
 
 // StartMining starts the mining process with the given miner address
-func (miner *Miner) Start() {
+func (miner *Miner) Start(reward float64) {
 	log.Println("Starting mining process...")
 
 	// Skip mining process if the transaction pool is empty
@@ -38,7 +38,7 @@ func (miner *Miner) Start() {
 	}
 
 	// Create a new block with the miner's address and reward
-	newBlock := miner.Blockchain.NewBlock(miner.Transactions, miner.Address, REWARD)
+	newBlock := miner.Blockchain.NewBlock(miner.Transactions, miner.Address, reward)
 
 	// Perform the proof of work algorithm
 	miner.PerformProofOfWork(newBlock)

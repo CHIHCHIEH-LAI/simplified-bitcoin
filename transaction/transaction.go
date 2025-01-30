@@ -3,6 +3,7 @@ package transaction
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/utils"
 )
@@ -69,4 +70,11 @@ func DeserializeTransaction(data string) (*Transaction, error) {
 		return nil, fmt.Errorf("failed to deserialize message: %v", err)
 	}
 	return &tx, nil
+}
+
+// SortTransactionsByFee sorts the transactions by fee
+func SortTransactionsByFee(transactions []*Transaction) {
+	sort.Slice(transactions, func(i, j int) bool {
+		return transactions[i].Fee > transactions[j].Fee
+	})
 }
