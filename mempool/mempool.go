@@ -1,4 +1,4 @@
-package transaction
+package mempool
 
 import (
 	"fmt"
@@ -6,17 +6,18 @@ import (
 	"sync"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/transaction"
 )
 
 type Mempool struct {
-	Transactions map[string]*Transaction // TransactionID -> Transaction
-	Mutex        *sync.Mutex             // Mutex for the mempool
+	Transactions map[string]*transaction.Transaction // TransactionID -> Transaction
+	Mutex        *sync.Mutex                         // Mutex for the mempool
 }
 
 // NewMempool creates a new mempool
 func NewMempool() *Mempool {
 	return &Mempool{
-		Transactions: make(map[string]*Transaction),
+		Transactions: make(map[string]*transaction.Transaction),
 		Mutex:        &sync.Mutex{},
 	}
 }
@@ -24,7 +25,7 @@ func NewMempool() *Mempool {
 // HandlenewTransaction handlkles a new transaction message
 func (mp *Mempool) HandleNewTransaction(msg *message.Message) {
 	// Deserialize the transaction
-	tx, err := DeserializeTransaction(msg.Payload)
+	tx, err := transaction.DeserializeTransaction(msg.Payload)
 	if err != nil {
 		log.Printf("Failed to deserialize transaction: %v\n", err)
 		return
@@ -41,12 +42,12 @@ func (mp *Mempool) HandleNewTransaction(msg *message.Message) {
 }
 
 // AddTransaction adds a transaction to the pool
-func (mp *Mempool) AddTransaction(tx *Transaction) error {
+func (mp *Mempool) AddTransaction(tx *transaction.Transaction) error {
 	mp.Mutex.Lock()
 	defer mp.Mutex.Unlock()
 
 	if mp.Transactions[tx.TransactionID] != nil {
-		return fmt.Errorf("Transaction with ID %s already exists", tx.TransactionID)
+		return fmt.Errorf("transaction with ID %s already exists", tx.TransactionID)
 	}
 	mp.Transactions[tx.TransactionID] = tx
 	return nil
@@ -55,7 +56,7 @@ func (mp *Mempool) AddTransaction(tx *Transaction) error {
 // RemoveTransaction removes a transaction from the pool
 func (mp *Mempool) RemoveTransaction(txID string) error {
 	if mp.Transactions[txID] == nil {
-		return fmt.Errorf("Transaction with ID %s does not exist", txID)
+		return fmt.Errorf("transaction with ID %s does not exist", txID)
 	}
 	delete(mp.Transactions, txID)
 	return nil
