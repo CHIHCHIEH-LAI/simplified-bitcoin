@@ -61,3 +61,24 @@ func (mp *Mempool) RemoveTransaction(txID string) error {
 	delete(mp.Transactions, txID)
 	return nil
 }
+
+// GetTopNRewardingTransactions returns the top N rewarding transactions
+func (mp *Mempool) GetTopNRewardingTransactions(n int) []*transaction.Transaction {
+	mp.Mutex.Lock()
+	defer mp.Mutex.Unlock()
+
+	// Convert the map to a slice
+	txSlice := make([]*transaction.Transaction, 0, len(mp.Transactions))
+	for _, tx := range mp.Transactions {
+		txSlice = append(txSlice, tx)
+	}
+
+	// Sort the transactions by fee
+	transaction.SortTransactionsByFee(txSlice)
+
+	// Get the top N rewarding transactions
+	if n > len(txSlice) {
+		n = len(txSlice)
+	}
+	return txSlice[:n]
+}
