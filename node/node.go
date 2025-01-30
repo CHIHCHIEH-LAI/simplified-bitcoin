@@ -16,7 +16,7 @@ type Node struct {
 	Transceiver       *network.Transceiver          // Tranceiver instance
 	MembershipManager *membership.MembershipManager // Membership manager
 	GossipManager     *gossip.GossipManager         // Gossip manager
-	Mempool           *mempool.Mempool              // Transaction manager
+	Mempool           *mempool.Mempool              // Mempool
 }
 
 // NewNode creates a new P2P node
