@@ -28,7 +28,7 @@ func NewMiner(address string, transactions []*transaction.Transaction, blockchai
 }
 
 // StartMining starts the mining process with the given miner address
-func (miner *Miner) Start() {
+func (miner *Miner) Start(reward float64) {
 	log.Println("Starting mining process...")
 
 	// Skip mining process if the transaction pool is empty
@@ -38,7 +38,7 @@ func (miner *Miner) Start() {
 	}
 
 	// Create a new block with the miner's address and reward
-	newBlock := miner.Blockchain.NewBlock(miner.Transactions, miner.Address, REWARD)
+	newBlock := miner.Blockchain.NewBlock(miner.Transactions, miner.Address, reward)
 
 	// Perform the proof of work algorithm
 	miner.PerformProofOfWork(newBlock)
