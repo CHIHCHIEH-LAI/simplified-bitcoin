@@ -3,6 +3,7 @@ package node
 import (
 	"log"
 
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/blockchain"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/gossip"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/membership"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/mempool"
@@ -18,6 +19,7 @@ type Node struct {
 	MembershipManager *membership.MembershipManager // Membership manager
 	GossipManager     *gossip.GossipManager         // Gossip manager
 	Mempool           *mempool.Mempool              // Mempool
+	Blockchain        *blockchain.Blockchain        // Blockchain
 	Miner             *mining.Miner                 // Miner
 }
 
@@ -34,6 +36,12 @@ func NewNode(address, port string) (*Node, error) {
 	// Create a new membership manager
 	membershipManager := membership.NewMembershipManager(address, transceiver)
 
+	// Create a Blockchain
+	blockchain := blockchain.NewBlockchain()
+
+	// Create a Miner
+	miner := mining.NewMiner(address, blockchain)
+
 	return &Node{
 		Address:           address,
 		Port:              port,
@@ -41,6 +49,8 @@ func NewNode(address, port string) (*Node, error) {
 		MembershipManager: membershipManager,
 		GossipManager:     gossip.NewGossipManager(transceiver, membershipManager),
 		Mempool:           mempool.NewMempool(),
+		Blockchain:        blockchain,
+		Miner:             miner,
 	}, nil
 }
 
