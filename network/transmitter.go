@@ -9,11 +9,11 @@ import (
 )
 
 type Transmitter struct {
-	MessageChannel <-chan *message.Message // Channel to transmit messages
+	MessageChannel chan *message.Message // Channel to transmit messages
 }
 
 // NewTransmitter creates a new Transmitter instance
-func NewTransmitter(messageChannel <-chan *message.Message) *Transmitter {
+func NewTransmitter(messageChannel chan *message.Message) *Transmitter {
 	return &Transmitter{
 		MessageChannel: messageChannel,
 	}
@@ -24,6 +24,11 @@ func (t *Transmitter) Run() {
 	for msg := range t.MessageChannel {
 		t.sendMessage(msg)
 	}
+}
+
+// Transmit sends a message to the transmitter
+func (t *Transmitter) Transmit(msg *message.Message) {
+	t.MessageChannel <- msg
 }
 
 // sendMessage sends a message to the specified address

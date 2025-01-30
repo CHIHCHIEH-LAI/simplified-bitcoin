@@ -34,17 +34,12 @@ func (tc *Transceiver) Run() {
 
 // Transmit sends a message
 func (tc *Transceiver) Transmit(msg *message.Message) {
-	tc.TransmitterChannel <- msg
+	tc.Transmitter.Transmit(msg)
 }
 
 // Receive receives a message
 func (tc *Transceiver) Receive() (*message.Message, bool) {
-	select {
-	case msg := <-tc.ReceiverChannel:
-		return msg, true
-	default:
-		return nil, false // No message available
-	}
+	return tc.Receiver.Receive()
 }
 
 // Close closes the tranceiver
