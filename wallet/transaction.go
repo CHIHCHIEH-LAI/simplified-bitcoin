@@ -3,7 +3,6 @@ package wallet
 import (
 	"fmt"
 
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/mempool"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/transaction"
 )
 
@@ -26,7 +25,7 @@ func (w *Wallet) CreateTransaction(recipient string, amount float64, fee float64
 // SendTransaction sends a transaction to a node in the network
 func (w *Wallet) SendTransaction(tx *transaction.Transaction, selfAddress string, nodeAddress string) error {
 	// Create and serialize the mwssage
-	message, err := mempool.NewMessage(
+	message, err := transaction.NewMessage(
 		selfAddress,
 		nodeAddress,
 		tx,
@@ -36,9 +35,7 @@ func (w *Wallet) SendTransaction(tx *transaction.Transaction, selfAddress string
 	}
 
 	// Send the message to the node
-	if err := w.Transmitter.Transmitter(message); err != nil {
-		return fmt.Errorf("failed to send transaction message: %v", err)
-	}
+	w.Transmitter.Transmit(message)
 
 	return nil
 }
