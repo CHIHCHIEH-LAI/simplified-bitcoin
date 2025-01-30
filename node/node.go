@@ -7,6 +7,7 @@ import (
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/membership"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/mempool"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/mining"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
 )
 
@@ -17,6 +18,7 @@ type Node struct {
 	MembershipManager *membership.MembershipManager // Membership manager
 	GossipManager     *gossip.GossipManager         // Gossip manager
 	Mempool           *mempool.Mempool              // Mempool
+	Miner             *mining.Miner                 // Miner
 }
 
 // NewNode creates a new P2P node
@@ -78,7 +80,8 @@ func (node *Node) handleIncomingMessage() {
 		case message.NEWTRANSACTION:
 			node.GossipManager.Gossip(msg)
 			node.Mempool.HandleNewTransaction(msg)
-		// case message.NEWBLOCK:
+		case message.NEWBLOCK:
+			node.GossipManager.Gossip(msg)
 		// 	node.HandleNewBlock(msg)
 		// case "GETBLOCKCHAIN":
 		// 	node.HandleGetBlockchain(msg)
@@ -95,4 +98,7 @@ func (node *Node) Close() {
 
 	// Close the gossip manager
 	node.GossipManager.Close()
+
+	// Close the miner
+	node.Miner.Close()
 }
