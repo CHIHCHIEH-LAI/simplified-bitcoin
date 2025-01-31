@@ -64,7 +64,7 @@ func (miner *Miner) Run() {
 			transactions := miner.Mempool.GetTopNRewardingTransactions(miner.NTransactions)
 			if len(transactions) == 0 {
 				log.Println("No transactions available. Pausing mining...")
-				time.Sleep(60 * time.Second) // Prevents high CPU usage when waiting for transactions
+				time.Sleep(20 * time.Second) // Prevents high CPU usage when waiting for transactions
 				continue
 			}
 
@@ -85,7 +85,7 @@ func (miner *Miner) Run() {
 			miner.BroadcastBlock(minedBlock)
 
 			// Pause to allow network sync before restarting
-			time.Sleep(2 * time.Second)
+			time.Sleep(60 * time.Second)
 		}
 	}
 }
