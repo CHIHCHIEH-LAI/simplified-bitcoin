@@ -56,15 +56,15 @@ func NewJOINRESPMessage(selfAddr, receipient, payload string) *message.Message {
 }
 
 // HandleJoinRequest processes a JOINREQ message
-func (mgr *MembershipManager) HandleJoinRequest(msg *message.Message) {
+func (mgr *MembershipManager) HandleJoinRequest(requester string) {
 	member := &Member{
-		Address:   msg.Sender,
+		Address:   requester,
 		Heartbeat: 0,
 		Timestamp: utils.GetCurrentTimeInUnix(),
 	}
 
 	// Check if the sender is already in the member list
-	if index := mgr.MemberList.FindMemberInList(msg.Sender); index == -1 {
+	if index := mgr.MemberList.FindMemberInList(requester); index == -1 {
 		mgr.MemberList.AddMemberToList(member)
 	} else {
 		mgr.MemberList.UpdateMemberInList(index, member)
@@ -77,10 +77,10 @@ func (mgr *MembershipManager) HandleJoinRequest(msg *message.Message) {
 		return
 	}
 
-	message := NewJOINRESPMessage(mgr.IPAddress, msg.Sender, payload)
+	msg := NewJOINRESPMessage(mgr.IPAddress, requester, payload)
 
 	// Send JOINRESP message
-	mgr.Transceiver.Transmit(message)
+	mgr.Transceiver.Transmit(msg)
 }
 
 // HandleJoinResponse processes a JOINRESP message
