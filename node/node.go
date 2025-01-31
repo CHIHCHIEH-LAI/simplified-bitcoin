@@ -3,50 +3,122 @@ package node
 import (
 	"log"
 
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/blockchain"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/gossip"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/membership"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/mempool"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/mining"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/transaction"
 )
 
 type Node struct {
-	Address            string                          // IP address of the node
-	MessageChannel     chan string                     // Channel to send and receive messages
-	MembershipManager  *membership.MembershipManager   // Membership manager
-	TransactionManager *transaction.TransactionManager // Transaction manager
+	IPAddress         string                        // IP address of the node
+	Port              string                        // Port of the node
+	Address           string                        // Address of the node (Hash of the public key)
+	Transceiver       *network.Transceiver          // Tranceiver instance
+	MembershipManager *membership.MembershipManager // Membership manager
+	GossipManager     *gossip.GossipManager         // Gossip manager
+	Mempool           *mempool.Mempool              // Mempool
+	Blockchain        *blockchain.Blockchain        // Blockchain
+	Miner             *mining.Miner                 // Miner
 }
 
 // NewNode creates a new P2P node
-func NewNode(address string) *Node {
-	return &Node{
-		Address:            address,
-		MessageChannel:     make(chan string, 100),
-		MembershipManager:  membership.NewMembershipManager(address),
-		TransactionManager: transaction.NewTransactionManager(),
+func NewNode(IPAddress, port, address string) (*Node, error) {
+	var err error
+
+	// Create a new tranceiver
+	transceiver, err := network.NewTransceiver(port)
+	if err != nil {
+		return nil, err
 	}
+
+	// Create a new membership manager
+	membershipManager := membership.NewMembershipManager(IPAddress, transceiver)
+
+	// Create a Blockchain
+	blockchain := blockchain.NewBlockchain()
+
+	// Create a Gossip Manager
+	gossipManager := gossip.NewGossipManager(IPAddress, transceiver, membershipManager)
+
+	// Create a Mempool
+	mempool := mempool.NewMempool()
+
+	// Create a Miner
+	miner := mining.NewMiner(address, blockchain, gossipManager, mempool)
+
+	return &Node{
+		Port:              port,
+		Transceiver:       transceiver,
+		MembershipManager: membershipManager,
+		GossipManager:     gossipManager,
+		Mempool:           mempool,
+		Blockchain:        blockchain,
+		Miner:             miner,
+	}, nil
 }
 
 // Run starts the P2P node
-func (node *Node) Run(port string, bootstrapNodeAddress string) error {
-	// Run the communication listener
-	go func() {
-		err := network.RunListener(port, node.MessageChannel)
-		if err != nil {
-			log.Fatalf("Failed to start listener on port %s: %v", port, err)
-		}
-	}()
+func (node *Node) Run(bootstrapNodeAddr string) error {
+	// Run the tranceiver
+	go node.Transceiver.Run()
 
-	// Start processing messages
-	go node.HandleMessage()
+	// Handle incoming messages
+	go node.handleIncomingMessage()
 
-	// Join the p2p network
-	err := node.MembershipManager.JoinGroup(bootstrapNodeAddress)
-	if err != nil {
-		log.Printf("Failed to join network via bootstrap node %s: %v", bootstrapNodeAddress, err)
-		return err
-	}
+	// Run the membership manager
+	go node.MembershipManager.Run(bootstrapNodeAddr)
 
-	// Start maintaining membership
-	go node.MembershipManager.MaintainMembership()
+	// Run the gossip manager
+	go node.GossipManager.Run(60)
+
+	// Run the miner
+	go node.Miner.Run()
 
 	return nil
+}
+
+// HandleIncomingMessage processes incoming messages
+func (node *Node) handleIncomingMessage() {
+	for {
+		msg, ok := node.Transceiver.Receive()
+		if !ok {
+			continue // Skip iteration if no message
+		}
+
+		// Process the message based on its type
+		switch msg.Type {
+		case message.JOINREQ:
+			requester := msg.Sender
+			node.MembershipManager.HandleJoinRequest(requester)
+		case message.JOINRESP:
+			node.MembershipManager.HandleJoinResponse(msg)
+		case message.HEARTBEAT:
+			node.MembershipManager.HandleHeartbeat(msg)
+		case message.NEWTRANSACTION:
+			node.GossipManager.Gossip(msg)
+			node.Mempool.HandleNewTransaction(msg)
+		case message.NEWBLOCK:
+			node.GossipManager.Gossip(msg)
+			block, _ := blockchain.DeserializeBlock(msg.Payload)
+			node.Mempool.RemoveTransactionsInBlock(block)
+			node.Miner.Restart()
+		default:
+			log.Printf("Unknown message type: %s\n", msg.Type)
+		}
+	}
+}
+
+// Close closes the P2P node
+func (node *Node) Close() {
+	// Close the tranceiver
+	node.Transceiver.Close()
+
+	// Close the gossip manager
+	node.GossipManager.Close()
+
+	// Close the miner
+	node.Miner.Close()
 }
