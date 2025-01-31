@@ -7,19 +7,17 @@ import (
 )
 
 type Blockchain struct {
-	BaseReward     float64
-	BaseMiningTime int64
-	Blocks         []*Block    `json:"blocks"` // Blocks in the blockchain
-	mutex          *sync.Mutex // Mutex to protect the blockchain
+	BaseReward float64
+	Blocks     []*Block    `json:"blocks"` // Blocks in the blockchain
+	mutex      *sync.Mutex // Mutex to protect the blockchain
 }
 
 // NewBlockchain creates a new blockchain with the genesis block
 func NewBlockchain() *Blockchain {
 	return &Blockchain{
-		BaseReward:     1000.0,
-		BaseMiningTime: 10 * 60,
-		Blocks:         []*Block{NewGenesisBlock()},
-		mutex:          &sync.Mutex{},
+		BaseReward: 1000.0,
+		Blocks:     []*Block{NewGenesisBlock()},
+		mutex:      &sync.Mutex{},
 	}
 }
 
