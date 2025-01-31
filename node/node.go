@@ -41,16 +41,15 @@ func NewNode(IPAddress, port, address string) (*Node, error) {
 	blockchain := blockchain.NewBlockchain()
 
 	// Create a Gossip Manager
-	gossipManager := gossip.NewGossipManager(transceiver, membershipManager)
+	gossipManager := gossip.NewGossipManager(IPAddress, transceiver, membershipManager)
 
 	// Create a Mempool
 	mempool := mempool.NewMempool()
 
 	// Create a Miner
-	miner := mining.NewMiner(IPAddress, address, blockchain, gossipManager, mempool)
+	miner := mining.NewMiner(address, blockchain, gossipManager, mempool)
 
 	return &Node{
-		IPAddress:         IPAddress,
 		Port:              port,
 		Transceiver:       transceiver,
 		MembershipManager: membershipManager,

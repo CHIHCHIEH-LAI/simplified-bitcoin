@@ -13,7 +13,6 @@ import (
 
 type Miner struct {
 	NTransactions int                    // Number of transactions per block
-	IPAddress     string                 // Node's IP Address
 	Address       string                 // Wallet Address of the Miner
 	Blockchain    *blockchain.Blockchain // Blockchain reference
 	GossipManager *gossip.GossipManager  // Gossip manager reference
@@ -25,7 +24,6 @@ type Miner struct {
 
 // NewMiner creates a new miner
 func NewMiner(
-	IPAddress string,
 	address string,
 	blockchain *blockchain.Blockchain,
 	gossipManager *gossip.GossipManager,
@@ -33,7 +31,6 @@ func NewMiner(
 ) *Miner {
 	return &Miner{
 		NTransactions: 10,
-		IPAddress:     IPAddress,
 		Address:       address,
 		Blockchain:    blockchain,
 		GossipManager: gossipManager,
@@ -118,7 +115,7 @@ func (miner *Miner) PerformProofOfWork(block *blockchain.Block) *blockchain.Bloc
 
 // BroadcastBlock sends the newly mined block to the network
 func (miner *Miner) BroadcastBlock(block *blockchain.Block) {
-	msg := blockchain.NewMinedBlockMessage(miner.IPAddress, block)
+	msg := blockchain.NewMinedBlockMessage(block)
 	miner.GossipManager.Gossip(msg)
 	log.Printf("Broadcasted new block: %s", block.BlockID)
 }
