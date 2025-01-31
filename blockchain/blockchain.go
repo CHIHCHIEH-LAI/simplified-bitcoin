@@ -20,6 +20,7 @@ func NewBlockchain() *Blockchain {
 		BaseReward:     1000.0,
 		BaseMiningTime: 10 * 60,
 		Blocks:         []*Block{NewGenesisBlock()},
+		mutex:          &sync.Mutex{},
 	}
 }
 
