@@ -84,6 +84,9 @@ func (miner *Miner) Run() {
 			// Broadcast the Mined Block
 			miner.BroadcastBlock(minedBlock)
 
+			// Remove transactions from the mempool
+			miner.Mempool.RemoveTransactionsInBlock(minedBlock)
+
 			// Pause to allow network sync before restarting
 			time.Sleep(60 * time.Second)
 		}
@@ -133,13 +136,6 @@ func (miner *Miner) Stop() {
 	log.Println("Stopping mining process...")
 	miner.StopMining <- true
 	miner.MiningActive = false
-}
-
-// RestartMining stops mining and starts it again after a short delay
-func (miner *Miner) Restart() {
-	miner.Stop()
-	time.Sleep(10 * time.Second) // Allow other nodes to sync before restarting
-	go miner.Run()
 }
 
 // Close closes the miner
