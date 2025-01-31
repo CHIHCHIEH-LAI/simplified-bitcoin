@@ -1,26 +1,34 @@
 package blockchain
 
 import (
+	"math"
 	"sync"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/transaction"
 )
 
 type Blockchain struct {
-	Blocks []*Block    `json:"blocks"` // Blocks in the blockchain
-	mutex  *sync.Mutex // Mutex to protect the blockchain
+	BaseReward     float64
+	BaseMiningTime int64
+	Blocks         []*Block    `json:"blocks"` // Blocks in the blockchain
+	mutex          *sync.Mutex // Mutex to protect the blockchain
 }
 
 // NewBlockchain creates a new blockchain with the genesis block
 func NewBlockchain() *Blockchain {
 	return &Blockchain{
-		Blocks: []*Block{NewGenesisBlock()},
+		BaseReward:     1000.0,
+		BaseMiningTime: 10 * 60,
+		Blocks:         []*Block{NewGenesisBlock()},
 	}
 }
 
 // NewBlock creates a new block with the given transactions
-func (bc *Blockchain) NewBlock(transactions []*transaction.Transaction, miner string, reward float64, difficulty int) *Block {
-	return NewBlock(bc.GetLatestBlock().BlockID, transactions, miner, reward, difficulty)
+func (bc *Blockchain) NewBlock(transactions []*transaction.Transaction, miner string) *Block {
+	prevHash := bc.GetLatestBlock().BlockID
+	reward := bc.CalculateReward()
+	difficulty := bc.CalculateDifficulty()
+	return NewBlock(prevHash, transactions, miner, reward, difficulty)
 }
 
 // AddBlock adds a new block to the blockchain
@@ -62,4 +70,16 @@ func (bc *Blockchain) GetLatestBlock() *Block {
 	bc.mutex.Lock()
 	defer bc.mutex.Unlock()
 	return bc.Blocks[len(bc.Blocks)-1]
+}
+
+// CalculateReward calculates the reward for the miner
+func (bc *Blockchain) CalculateReward() float64 {
+	return bc.BaseReward / float64(len(bc.Blocks))
+}
+
+// CalculateDifficulty calculates the difficulty for the miner
+func (bc *Blockchain) CalculateDifficulty() int {
+	lastBlockMinedTime := bc.GetLatestBlock().Timestamp - bc.Blocks[len(bc.Blocks)-2].Timestamp
+	difficulty := int(math.Max(5, float64(bc.BaseMiningTime/lastBlockMinedTime)))
+	return difficulty
 }
