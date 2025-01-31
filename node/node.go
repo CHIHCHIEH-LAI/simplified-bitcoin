@@ -13,7 +13,7 @@ import (
 )
 
 type Node struct {
-	Address           string                        // IP address of the node
+	IPAddress         string                        // IP address of the node
 	Port              string                        // Port of the node
 	Transceiver       *network.Transceiver          // Tranceiver instance
 	MembershipManager *membership.MembershipManager // Membership manager
@@ -24,7 +24,7 @@ type Node struct {
 }
 
 // NewNode creates a new P2P node
-func NewNode(address, port string) (*Node, error) {
+func NewNode(IPAddress, port string) (*Node, error) {
 	var err error
 
 	// Create a new tranceiver
@@ -34,23 +34,19 @@ func NewNode(address, port string) (*Node, error) {
 	}
 
 	// Create a new membership manager
-	membershipManager := membership.NewMembershipManager(address, transceiver)
+	membershipManager := membership.NewMembershipManager(IPAddress, transceiver)
 
 	// Create a Blockchain
 	blockchain := blockchain.NewBlockchain()
 
-	// Create a Miner
-	miner := mining.NewMiner(address, blockchain)
-
 	return &Node{
-		Address:           address,
+		IPAddress:         IPAddress,
 		Port:              port,
 		Transceiver:       transceiver,
 		MembershipManager: membershipManager,
 		GossipManager:     gossip.NewGossipManager(transceiver, membershipManager),
 		Mempool:           mempool.NewMempool(),
 		Blockchain:        blockchain,
-		Miner:             miner,
 	}, nil
 }
 

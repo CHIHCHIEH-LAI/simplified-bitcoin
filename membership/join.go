@@ -10,13 +10,13 @@ import (
 // JoinGroup joins the P2P group via the bootstrap node
 func (mgr *MembershipManager) JoinGroup(bootstrapNodeAddress string) {
 	// Introduce self to the group if bootstrap node is self
-	if bootstrapNodeAddress == "" || bootstrapNodeAddress == mgr.Address {
+	if bootstrapNodeAddress == "" || bootstrapNodeAddress == mgr.IPAddress {
 		mgr.IntroduceSelfToGroup()
 		return
 	}
 
 	// Create a JOINREQ message
-	message := NewJOINREQMessage(mgr.Address, bootstrapNodeAddress)
+	message := NewJOINREQMessage(mgr.IPAddress, bootstrapNodeAddress)
 
 	// Send JOINREQ message
 	mgr.Transceiver.Transmit(message)
@@ -26,7 +26,7 @@ func (mgr *MembershipManager) JoinGroup(bootstrapNodeAddress string) {
 func (mgr *MembershipManager) IntroduceSelfToGroup() {
 	// Add self to the member list
 	member := &Member{
-		Address:   mgr.Address,
+		Address:   mgr.IPAddress,
 		Heartbeat: 0,
 		Timestamp: utils.GetCurrentTimeInUnix(),
 	}
@@ -77,7 +77,7 @@ func (mgr *MembershipManager) HandleJoinRequest(msg *message.Message) {
 		return
 	}
 
-	message := NewJOINRESPMessage(mgr.Address, msg.Sender, payload)
+	message := NewJOINRESPMessage(mgr.IPAddress, msg.Sender, payload)
 
 	// Send JOINRESP message
 	mgr.Transceiver.Transmit(message)

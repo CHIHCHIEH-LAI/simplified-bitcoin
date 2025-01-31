@@ -28,7 +28,7 @@ func (mgr *MembershipManager) HandleHeartbeat(msg *message.Message) {
 	}
 
 	// Update the member list
-	mgr.MemberList.UpdateMemberList(memberList, mgr.Address)
+	mgr.MemberList.UpdateMemberList(memberList, mgr.IPAddress)
 }
 
 // GossipHeartbeat sends a HEARTBEAT message to some random members in the network
@@ -45,7 +45,7 @@ func (mgr *MembershipManager) GossipHeartbeat() {
 		return
 	}
 
-	message := NewHEARTBEATMessage(mgr.Address, payload)
+	message := NewHEARTBEATMessage(mgr.IPAddress, payload)
 
 	// Select some random members to send the HEARTBEAT message
 	n_target := int(math.Sqrt(float64(len(mgr.MemberList.Members))))

@@ -8,15 +8,15 @@ import (
 )
 
 type MembershipManager struct {
-	Address     string
+	IPAddress   string
 	MemberList  *MemberList
 	Transceiver *network.Transceiver
 }
 
 // NewMembershipManager creates a new membership manager
-func NewMembershipManager(address string, transceiver *network.Transceiver) *MembershipManager {
+func NewMembershipManager(IPAddress string, transceiver *network.Transceiver) *MembershipManager {
 	return &MembershipManager{
-		Address:     address,
+		IPAddress:   IPAddress,
 		MemberList:  NewMemberList(),
 		Transceiver: transceiver,
 	}
@@ -28,7 +28,7 @@ func (mgr *MembershipManager) Run(bootstrapNodeAddr string) {
 	mgr.JoinGroup(bootstrapNodeAddr)
 
 	for {
-		mgr.MemberList.UpdateSelfInMemberList(mgr.Address)
+		mgr.MemberList.UpdateSelfInMemberList(mgr.IPAddress)
 		mgr.MemberList.RemoveFailedMembers()
 		mgr.GossipHeartbeat()
 		time.Sleep(TIMEHEARTBEAT * time.Second)
@@ -48,7 +48,7 @@ func (mgr *MembershipManager) SelectNMembers(n_target int) []*Member {
 		index := rand.Intn(len(mgr.MemberList.Members))
 
 		// Skip self
-		if mgr.MemberList.Members[index].Address == mgr.Address {
+		if mgr.MemberList.Members[index].Address == mgr.IPAddress {
 			continue
 		}
 
