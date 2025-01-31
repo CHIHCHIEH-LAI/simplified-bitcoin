@@ -55,6 +55,7 @@ func startNode() {
 	if err != nil {
 		log.Fatalf("Failed to create node: %v\n", err)
 	}
+	defer node.Close()
 
 	// Start the node
 	log.Printf("Starting node at %s...\n", address)

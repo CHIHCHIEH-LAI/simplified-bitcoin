@@ -1,7 +1,6 @@
 package blockchain
 
 import (
-	"math"
 	"sync"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/transaction"
@@ -80,7 +79,5 @@ func (bc *Blockchain) CalculateReward() float64 {
 
 // CalculateDifficulty calculates the difficulty for the miner
 func (bc *Blockchain) CalculateDifficulty() int {
-	lastBlockMinedTime := bc.GetLatestBlock().Timestamp - bc.Blocks[len(bc.Blocks)-2].Timestamp
-	difficulty := int(math.Max(5, float64(bc.BaseMiningTime/lastBlockMinedTime)))
-	return difficulty
+	return 5
 }
