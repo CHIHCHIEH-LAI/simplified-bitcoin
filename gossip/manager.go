@@ -1,6 +1,7 @@
 package gossip
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/membership"
@@ -13,7 +14,7 @@ type GossipManager struct {
 	IPAddress         string                        // IP address of the node
 	Transceiver       *network.Transceiver          // Tranceiver instance
 	MembershipManager *membership.MembershipManager // Membership manager
-	SeenMessage       map[message.Message]bool      // Seen messages
+	SeenMessage       map[string]bool               // Seen messages
 }
 
 // NewGossipManager creates a new gossip manager
@@ -22,21 +23,21 @@ func NewGossipManager(IPAddress string, transceiver *network.Transceiver, member
 		IPAddress:         IPAddress,
 		Transceiver:       transceiver,
 		MembershipManager: membershipManager,
-		SeenMessage:       make(map[message.Message]bool),
+		SeenMessage:       make(map[string]bool),
 	}
 }
 
 // Run starts the gossip manager
 func (mgr *GossipManager) Run(staleThreshold int64) {
-	mgr.removeStaleMessages(staleThreshold)
+	mgr.cleanSeenMessages()
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(10 * 60 * time.Second)
 }
 
 // Gossip sends a message to N random members
 func (mgr *GossipManager) Gossip(msg *message.Message) {
 	// Check if the message has been seen before
-	if _, ok := mgr.SeenMessage[*msg]; ok {
+	if _, ok := mgr.SeenMessage[hashMessage(msg)]; ok {
 		return
 	}
 
@@ -50,23 +51,25 @@ func (mgr *GossipManager) Gossip(msg *message.Message) {
 
 	// Send the message to the selected members
 	for _, member := range selectedMembers {
-		msg.Receipient = member.Address
+		msg.Receipient = member.IPAddress
 		mgr.Transceiver.Transmit(msg)
 	}
 
 	// Mark the message as seen
-	mgr.SeenMessage[*msg] = true
+	mgr.SeenMessage[hashMessage(msg)] = true
 }
 
-// removeStaleMessages removes messages that are older than the given threshold
-func (mgr *GossipManager) removeStaleMessages(threshold int64) {
-	for msg := range mgr.SeenMessage {
-		if msg.Timestamp < threshold {
-			delete(mgr.SeenMessage, msg)
-		}
-	}
+// cleanSeenMessages cleans the seen messages
+func (mgr *GossipManager) cleanSeenMessages() {
+	mgr.SeenMessage = make(map[string]bool)
 }
 
 // Close closes the gossip manager
 func (mgr *GossipManager) Close() {
+}
+
+// hashMessage hashes the message
+func hashMessage(msg *message.Message) string {
+	msgData := fmt.Sprintf("%s|%s", msg.Type, msg.Payload)
+	return utils.Hash(msgData)
 }

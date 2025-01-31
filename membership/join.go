@@ -26,7 +26,7 @@ func (mgr *MembershipManager) JoinGroup(bootstrapNodeAddress string) {
 func (mgr *MembershipManager) IntroduceSelfToGroup() {
 	// Add self to the member list
 	member := &Member{
-		Address:   mgr.IPAddress,
+		IPAddress: mgr.IPAddress,
 		Heartbeat: 0,
 		Timestamp: utils.GetCurrentTimeInUnix(),
 	}
@@ -58,7 +58,7 @@ func NewJOINRESPMessage(selfAddr, receipient, payload string) *message.Message {
 // HandleJoinRequest processes a JOINREQ message
 func (mgr *MembershipManager) HandleJoinRequest(requester string) {
 	member := &Member{
-		Address:   requester,
+		IPAddress: requester,
 		Heartbeat: 0,
 		Timestamp: utils.GetCurrentTimeInUnix(),
 	}

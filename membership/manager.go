@@ -48,7 +48,7 @@ func (mgr *MembershipManager) SelectNMembers(n_target int) []*Member {
 		index := rand.Intn(len(mgr.MemberList.Members))
 
 		// Skip self
-		if mgr.MemberList.Members[index].Address == mgr.IPAddress {
+		if mgr.MemberList.Members[index].IPAddress == mgr.IPAddress {
 			continue
 		}
 
