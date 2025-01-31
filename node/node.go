@@ -13,8 +13,9 @@ import (
 )
 
 type Node struct {
-	Address           string                        // IP address of the node
+	IPAddress         string                        // IP address of the node
 	Port              string                        // Port of the node
+	Address           string                        // Address of the node (Hash of the public key)
 	Transceiver       *network.Transceiver          // Tranceiver instance
 	MembershipManager *membership.MembershipManager // Membership manager
 	GossipManager     *gossip.GossipManager         // Gossip manager
@@ -24,7 +25,7 @@ type Node struct {
 }
 
 // NewNode creates a new P2P node
-func NewNode(address, port string) (*Node, error) {
+func NewNode(IPAddress, port, address string) (*Node, error) {
 	var err error
 
 	// Create a new tranceiver
@@ -34,21 +35,26 @@ func NewNode(address, port string) (*Node, error) {
 	}
 
 	// Create a new membership manager
-	membershipManager := membership.NewMembershipManager(address, transceiver)
+	membershipManager := membership.NewMembershipManager(IPAddress, transceiver)
 
 	// Create a Blockchain
 	blockchain := blockchain.NewBlockchain()
 
+	// Create a Gossip Manager
+	gossipManager := gossip.NewGossipManager(IPAddress, transceiver, membershipManager)
+
+	// Create a Mempool
+	mempool := mempool.NewMempool()
+
 	// Create a Miner
-	miner := mining.NewMiner(address, blockchain)
+	miner := mining.NewMiner(address, blockchain, gossipManager, mempool)
 
 	return &Node{
-		Address:           address,
 		Port:              port,
 		Transceiver:       transceiver,
 		MembershipManager: membershipManager,
-		GossipManager:     gossip.NewGossipManager(transceiver, membershipManager),
-		Mempool:           mempool.NewMempool(),
+		GossipManager:     gossipManager,
+		Mempool:           mempool,
 		Blockchain:        blockchain,
 		Miner:             miner,
 	}, nil
@@ -65,8 +71,11 @@ func (node *Node) Run(bootstrapNodeAddr string) error {
 	// Run the membership manager
 	go node.MembershipManager.Run(bootstrapNodeAddr)
 
-	// Start the gossip manager
+	// Run the gossip manager
 	go node.GossipManager.Run(60)
+
+	// Run the miner
+	go node.Miner.Run()
 
 	return nil
 }
@@ -92,9 +101,7 @@ func (node *Node) handleIncomingMessage() {
 			node.Mempool.HandleNewTransaction(msg)
 		case message.NEWBLOCK:
 			node.GossipManager.Gossip(msg)
-		// 	node.HandleNewBlock(msg)
-		// case "GETBLOCKCHAIN":
-		// 	node.HandleGetBlockchain(msg)
+			node.Miner.Restart()
 		default:
 			log.Printf("Unknown message type: %s\n", msg.Type)
 		}

@@ -10,14 +10,16 @@ import (
 )
 
 type GossipManager struct {
+	IPAddress         string                        // IP address of the node
 	Transceiver       *network.Transceiver          // Tranceiver instance
 	MembershipManager *membership.MembershipManager // Membership manager
 	SeenMessage       map[message.Message]bool      // Seen messages
 }
 
 // NewGossipManager creates a new gossip manager
-func NewGossipManager(transceiver *network.Transceiver, membershipManager *membership.MembershipManager) *GossipManager {
+func NewGossipManager(IPAddress string, transceiver *network.Transceiver, membershipManager *membership.MembershipManager) *GossipManager {
 	return &GossipManager{
+		IPAddress:         IPAddress,
 		Transceiver:       transceiver,
 		MembershipManager: membershipManager,
 		SeenMessage:       make(map[message.Message]bool),
@@ -37,6 +39,9 @@ func (mgr *GossipManager) Gossip(msg *message.Message) {
 	if _, ok := mgr.SeenMessage[*msg]; ok {
 		return
 	}
+
+	// Set the sender of the message
+	msg.Sender = mgr.IPAddress
 
 	// Select N random members to send the message to
 	n_members := mgr.MembershipManager.GetNumberOfMembers()
