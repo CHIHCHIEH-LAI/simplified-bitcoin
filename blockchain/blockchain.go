@@ -80,6 +80,10 @@ func (bc *Blockchain) CalculateReward() float64 {
 
 // CalculateDifficulty calculates the difficulty for the miner
 func (bc *Blockchain) CalculateDifficulty() int {
+	if len(bc.Blocks) < 2 {
+		return 5
+	}
+
 	lastBlockMinedTime := bc.GetLatestBlock().Timestamp - bc.Blocks[len(bc.Blocks)-2].Timestamp
 	difficulty := int(math.Max(5, float64(bc.BaseMiningTime/lastBlockMinedTime)))
 	return difficulty
