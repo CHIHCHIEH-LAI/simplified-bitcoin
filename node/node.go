@@ -91,7 +91,8 @@ func (node *Node) handleIncomingMessage() {
 		// Process the message based on its type
 		switch msg.Type {
 		case message.JOINREQ:
-			node.MembershipManager.HandleJoinRequest(msg)
+			requester := msg.Sender
+			node.MembershipManager.HandleJoinRequest(requester)
 		case message.JOINRESP:
 			node.MembershipManager.HandleJoinResponse(msg)
 		case message.HEARTBEAT:
