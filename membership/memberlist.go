@@ -8,7 +8,7 @@ import (
 )
 
 type Member struct {
-	Address   string `json:"address"`   // IP:Port
+	IPAddress string `json:"address"`   // IP:Port
 	Heartbeat int64  `json:"heartbeat"` // Number of heartbeats
 	Timestamp int64  `json:"timestamp"` // Timestamp of the last heartbeat
 }
@@ -47,12 +47,12 @@ func DeserializeMemberList(data string) (*MemberList, error) {
 func (ml *MemberList) UpdateMemberList(newMemberList *MemberList, selfAddr string) {
 	for _, newMember := range newMemberList.Members {
 		// Check if the member is self
-		if newMember.Address == selfAddr {
+		if newMember.IPAddress == selfAddr {
 			continue
 		}
 
 		// Find the member in the list
-		index := ml.FindMemberInList(newMember.Address)
+		index := ml.FindMemberInList(newMember.IPAddress)
 		if index == -1 { // Add the member if it does not exist
 			ml.AddMemberToList(newMember)
 		} else if newMember.Heartbeat > ml.Members[index].Heartbeat { // Update the member if the heartbeat is greater
@@ -64,7 +64,7 @@ func (ml *MemberList) UpdateMemberList(newMemberList *MemberList, selfAddr strin
 // FindMemberInList finds a member in the list by address
 func (ml *MemberList) FindMemberInList(address string) int {
 	for i, member := range ml.Members {
-		if member.Address == address {
+		if member.IPAddress == address {
 			return i
 		}
 	}
@@ -93,7 +93,7 @@ func (ml *MemberList) UpdateSelfInMemberList(selfAddr string) {
 	index := ml.FindMemberInList(selfAddr)
 	if index == -1 {
 		member := &Member{
-			Address:   selfAddr,
+			IPAddress: selfAddr,
 			Heartbeat: 0,
 			Timestamp: utils.GetCurrentTimeInUnix(),
 		}

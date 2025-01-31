@@ -54,7 +54,7 @@ func (mgr *MembershipManager) GossipHeartbeat() {
 	// Send HEARTBEAT message to some random members in the network
 	for _, member := range selectedMembers {
 		// Send HEARTBEAT message to the member
-		message.Receipient = member.Address
+		message.Receipient = member.IPAddress
 		mgr.Transceiver.Transmit(message)
 	}
 }

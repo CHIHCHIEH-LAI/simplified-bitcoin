@@ -50,7 +50,9 @@ func NewNode(IPAddress, port, address string) (*Node, error) {
 	miner := mining.NewMiner(address, blockchain, gossipManager, mempool)
 
 	return &Node{
+		IPAddress:         IPAddress,
 		Port:              port,
+		Address:           address,
 		Transceiver:       transceiver,
 		MembershipManager: membershipManager,
 		GossipManager:     gossipManager,
