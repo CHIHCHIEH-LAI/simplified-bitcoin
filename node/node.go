@@ -105,6 +105,7 @@ func (node *Node) handleIncomingMessage() {
 			node.Miner.Stop()
 			block, _ := blockchain.DeserializeBlock(msg.Payload)
 			node.Mempool.RemoveTransactionsInBlock(block)
+			node.Blockchain.AddBlock(block)
 			go node.Miner.Run()
 		default:
 			log.Printf("Unknown message type: %s\n", msg.Type)
