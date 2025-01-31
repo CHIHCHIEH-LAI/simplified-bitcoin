@@ -102,6 +102,8 @@ func (node *Node) handleIncomingMessage() {
 			node.Mempool.HandleNewTransaction(msg)
 		case message.NEWBLOCK:
 			node.GossipManager.Gossip(msg)
+			block, _ := blockchain.DeserializeBlock(msg.Payload)
+			node.Mempool.RemoveTransactionsInBlock(block)
 			node.Miner.Restart()
 		default:
 			log.Printf("Unknown message type: %s\n", msg.Type)
