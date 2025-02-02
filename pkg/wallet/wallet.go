@@ -8,7 +8,6 @@ import (
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/network"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/utils"
 )
 
 type Wallet struct {
@@ -28,7 +27,7 @@ func NewWallet() *Wallet {
 
 // GetAddress generates a public key hash (address) for the wallet
 func (w *Wallet) GetAddress() string {
-	return utils.Hash(string(w.PublicKey))
+	return hex.EncodeToString(w.PublicKey)
 }
 
 // Sign creates a signature for the given data using the wallet's private key
