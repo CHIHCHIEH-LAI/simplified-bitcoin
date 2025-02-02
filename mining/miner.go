@@ -8,8 +8,8 @@ import (
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/blockchain"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/blockchain/block"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/gossip"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/mempool"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/mining/mempool"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/p2p/gossip"
 )
 
 type Miner struct {

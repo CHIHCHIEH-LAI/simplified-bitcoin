@@ -5,12 +5,12 @@ import (
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/blockchain"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/blockchain/block"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/gossip"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/membership"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/mempool"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/mining"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/mining/mempool"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/p2p/gossip"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/p2p/membership"
 )
 
 type Node struct {
