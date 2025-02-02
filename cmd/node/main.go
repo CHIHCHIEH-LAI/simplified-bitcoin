@@ -58,7 +58,7 @@ func startNode() {
 	defer node.Close()
 
 	// Start the node
-	log.Printf("Starting node at %s...\n", address)
+	log.Printf("Starting node at %s...\n", IPAddress)
 	node.Run(bootstrapNodeAddr)
 
 	// Keep the server running
