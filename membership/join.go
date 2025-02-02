@@ -56,7 +56,9 @@ func NewJOINRESPMessage(selfAddr, receipient, payload string) *message.Message {
 }
 
 // HandleJoinRequest processes a JOINREQ message
-func (mgr *MembershipManager) HandleJoinRequest(requester string) {
+func (mgr *MembershipManager) HandleJoinRequest(msg *message.Message) {
+	requester := msg.Sender
+
 	member := &Member{
 		IPAddress: requester,
 		Heartbeat: 0,
@@ -77,10 +79,10 @@ func (mgr *MembershipManager) HandleJoinRequest(requester string) {
 		return
 	}
 
-	msg := NewJOINRESPMessage(mgr.IPAddress, requester, payload)
+	message := NewJOINRESPMessage(mgr.IPAddress, requester, payload)
 
 	// Send JOINRESP message
-	mgr.Transceiver.Transmit(msg)
+	mgr.Transceiver.Transmit(message)
 }
 
 // HandleJoinResponse processes a JOINRESP message
