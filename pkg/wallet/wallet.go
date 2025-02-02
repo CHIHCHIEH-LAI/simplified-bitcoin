@@ -33,9 +33,14 @@ func (w *Wallet) GetAddress() string {
 }
 
 // Sign creates a signature for the given data using the wallet's private key
-func (w *Wallet) Sign(data string) (string, error) {
-	hash := sha256.Sum256([]byte(data))
-	r, s, err := ecdsa.Sign(rand.Reader, w.PrivateKey, hash[:])
+func (w *Wallet) Sign(hash string) (string, error) {
+	// Decode the hash
+	hashBytes, err := hex.DecodeString(hash)
+	if err != nil {
+		return "", err
+	}
+
+	r, s, err := ecdsa.Sign(rand.Reader, w.PrivateKey, hashBytes)
 	if err != nil {
 		return "", err
 	}

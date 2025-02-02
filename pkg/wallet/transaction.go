@@ -12,12 +12,15 @@ func (w *Wallet) CreateTransaction(recipient string, amount float64, fee float64
 	tx := transaction.NewUnsignedTransaction(w.GetAddress(), recipient, amount, fee)
 
 	// Sign the transaction
-	data := fmt.Sprintf("%s%s%f%f%d", tx.Sender, tx.Recipient, tx.Amount, tx.Fee, tx.Timestamp)
-	signature, err := w.Sign(data)
+	hash := tx.Hash()
+	signature, err := w.Sign(hash)
 	if err != nil {
 		return nil, err
 	}
 	tx.Signature = signature
+
+	// Generate the transaction ID
+	tx.TransactionID = tx.GenerateTransactionID()
 
 	return tx, nil
 }
