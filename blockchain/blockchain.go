@@ -45,25 +45,6 @@ func (bc *Blockchain) AddBlock(block *block.Block) error {
 	return nil
 }
 
-// ValidateBlock validates the block
-func (bc *Blockchain) ValidateBlock(block *block.Block) error {
-	bc.mutex.Lock()
-	defer bc.mutex.Unlock()
-
-	// Validate the block ID
-	if err := block.ValidateBlockID(); err != nil {
-		return err
-	}
-
-	// Validate the previous hash
-	prevBlock := bc.Blocks[len(bc.Blocks)-1]
-	if err := block.ValidatePrevHash(prevBlock.BlockID); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // GetLatestBlock returns the latest block in the blockchain
 func (bc *Blockchain) GetLatestBlock() *block.Block {
 	bc.mutex.Lock()
