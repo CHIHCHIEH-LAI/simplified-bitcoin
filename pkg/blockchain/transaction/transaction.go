@@ -48,9 +48,15 @@ func (tx *Transaction) GenerateTransactionID() string {
 	return utils.Hash(data)
 }
 
+// Hash generates the hash of the transaction
 func (tx *Transaction) Hash() string {
-	data := fmt.Sprintf("%s%s%f%f%d", tx.Sender, tx.Recipient, tx.Amount, tx.Fee, tx.Timestamp)
+	data := tx.GenerateDataForSigning()
 	return utils.Hash(data)
+}
+
+// GenerateDataForSigning generates the data that needs to be signed
+func (tx *Transaction) GenerateDataForSigning() string {
+	return fmt.Sprintf("%s%s%f%f%d", tx.Sender, tx.Recipient, tx.Amount, tx.Fee, tx.Timestamp)
 }
 
 // Serialize serializes the transaction into a string
