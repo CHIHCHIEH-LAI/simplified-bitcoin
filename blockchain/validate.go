@@ -13,8 +13,8 @@ func (bc *Blockchain) ValidateBlock(b *block.Block) error {
 	}
 
 	// Validate the previous hash
-	prevBlock := bc.Blocks[len(bc.Blocks)-1]
-	if err := b.ValidatePrevHash(prevBlock.BlockID); err != nil {
+	latestBlock := bc.GetLatestBlock()
+	if err := b.ValidatePrevHash(latestBlock.BlockID); err != nil {
 		return err
 	}
 
