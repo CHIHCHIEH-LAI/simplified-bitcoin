@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/blockchain"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/blockchain/block"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/gossip"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/mempool"
 )
@@ -94,7 +95,7 @@ func (miner *Miner) Run() {
 }
 
 // PerformProofOfWork executes the proof of work algorithm
-func (miner *Miner) PerformProofOfWork(block *blockchain.Block) *blockchain.Block {
+func (miner *Miner) PerformProofOfWork(block *block.Block) *block.Block {
 	log.Printf("Mining block %s with difficulty %d...\n", block.BlockID, block.Difficulty)
 	prefix := strings.Repeat("0", block.Difficulty)
 
@@ -117,10 +118,10 @@ func (miner *Miner) PerformProofOfWork(block *blockchain.Block) *blockchain.Bloc
 }
 
 // BroadcastBlock sends the newly mined block to the network
-func (miner *Miner) BroadcastBlock(block *blockchain.Block) {
-	msg := blockchain.NewMinedBlockMessage(block)
+func (miner *Miner) BroadcastBlock(b *block.Block) {
+	msg := block.NewMinedBlockMessage(b)
 	miner.GossipManager.Gossip(msg)
-	log.Printf("Broadcasted new block: %s", block.BlockID)
+	log.Printf("Broadcasted new block: %s", b.BlockID)
 }
 
 // StopMining stops the current mining process

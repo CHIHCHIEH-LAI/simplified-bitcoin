@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/blockchain"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/blockchain/block"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/gossip"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/membership"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/mempool"
@@ -104,7 +105,7 @@ func (node *Node) handleIncomingMessage() {
 		case message.NEWBLOCK:
 			node.GossipManager.Gossip(msg)
 			node.Miner.Stop()
-			block, _ := blockchain.DeserializeBlock(msg.Payload)
+			block, _ := block.DeserializeBlock(msg.Payload)
 			node.Mempool.RemoveTransactionsInBlock(block)
 			node.Blockchain.AddBlock(block)
 			go node.Miner.Run()
