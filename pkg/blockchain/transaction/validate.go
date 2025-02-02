@@ -99,8 +99,11 @@ func (tx *Transaction) validateTimestamp() error {
 	return nil
 }
 
-// TODO: Implement validateSignature
 // validateSignature checks if the signature is valid
 func (tx *Transaction) validateSignature() error {
+	data := tx.GenerateDataForSigning()
+	if !utils.VerifySignature(tx.Sender, data, tx.Signature) {
+		return fmt.Errorf("invalid signature")
+	}
 	return nil
 }
