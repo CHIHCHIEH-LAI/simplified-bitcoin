@@ -32,14 +32,14 @@ func (bc *Blockchain) NewBlock(transactions []*transaction.Transaction, miner st
 
 // AddBlock adds a new block to the blockchain
 func (bc *Blockchain) AddBlock(block *block.Block) error {
+	bc.mutex.Lock()
+	defer bc.mutex.Unlock()
 
 	// Validate the block
 	if err := bc.ValidateBlock(block); err != nil {
 		return err
 	}
 
-	bc.mutex.Lock()
-	defer bc.mutex.Unlock()
 	bc.Blocks = append(bc.Blocks, block)
 
 	return nil
