@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/node"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/wallet"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/node"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/wallet"
 )
 
 var (
