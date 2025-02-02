@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/transaction"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/blockchain/transaction"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/utils"
 )
 

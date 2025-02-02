@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/blockchain/block"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/transaction"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/blockchain/transaction"
 )
 
 type Blockchain struct {
