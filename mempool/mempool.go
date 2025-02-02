@@ -5,7 +5,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/blockchain"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/blockchain/block"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/transaction"
 )
@@ -55,7 +55,7 @@ func (mp *Mempool) AddTransaction(tx *transaction.Transaction) error {
 }
 
 // RemoveTransactionsInBlock removes transactions in a block from the pool
-func (mp *Mempool) RemoveTransactionsInBlock(block *blockchain.Block) {
+func (mp *Mempool) RemoveTransactionsInBlock(block *block.Block) {
 	mp.Mutex.Lock()
 	defer mp.Mutex.Unlock()
 
