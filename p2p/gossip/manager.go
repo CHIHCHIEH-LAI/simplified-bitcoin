@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/membership"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/network"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/p2p/membership"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/utils"
 )
 
