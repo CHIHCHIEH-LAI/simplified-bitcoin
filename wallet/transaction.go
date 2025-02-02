@@ -3,7 +3,7 @@ package wallet
 import (
 	"fmt"
 
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/transaction"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/blockchain/transaction"
 )
 
 // CreateTransaction creates a new transaction
