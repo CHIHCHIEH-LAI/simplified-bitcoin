@@ -55,24 +55,6 @@ func NewGenesisBlock() *Block {
 	return NewBlock("", nil, "", 0, 0)
 }
 
-// ValidateBlockID validates the block ID
-func (b *Block) ValidateBlockID() error {
-	if b.BlockID != b.GenerateBlockID() {
-		return fmt.Errorf("invalid block ID")
-	}
-
-	return nil
-}
-
-// ValidatePrevHash validates the previous hash
-func (b *Block) ValidatePrevHash(prevHash string) error {
-	if b.PrevHash != prevHash {
-		return fmt.Errorf("invalid previous hash")
-	}
-
-	return nil
-}
-
 // Serialize serializes the block to a JSON string
 func (b *Block) Serialize() (string, error) {
 	data, err := json.Marshal(b)
