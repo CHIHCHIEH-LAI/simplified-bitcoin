@@ -32,9 +32,6 @@ func NewGossipManager(IPAddress string, transceiver *network.Transceiver, member
 
 // Run starts the gossip manager
 func (mgr *GossipManager) Run(staleThreshold int64) {
-	mgr.Mutex.Lock()
-	defer mgr.Mutex.Unlock()
-
 	mgr.cleanSeenMessages()
 
 	time.Sleep(10 * 60 * time.Second)
