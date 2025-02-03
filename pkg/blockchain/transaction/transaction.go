@@ -3,6 +3,7 @@ package transaction
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"sort"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/utils"
@@ -83,4 +84,15 @@ func SortTransactionsByFee(transactions []*Transaction) {
 	sort.Slice(transactions, func(i, j int) bool {
 		return transactions[i].Fee > transactions[j].Fee
 	})
+}
+
+// PrintTransaction prints the transaction
+func (tx *Transaction) PrintTransaction() {
+	log.Printf("Transaction ID: %s", tx.TransactionID)
+	log.Printf("Sender: %s", tx.Sender)
+	log.Printf("Recipient: %s", tx.Recipient)
+	log.Printf("Amount: %f", tx.Amount)
+	log.Printf("Fee: %f", tx.Fee)
+	log.Printf("Timestamp: %d", tx.Timestamp)
+	log.Printf("Signature: %s", tx.Signature)
 }

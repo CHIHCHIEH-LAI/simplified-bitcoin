@@ -2,6 +2,7 @@ package gossip
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/message"
@@ -15,6 +16,7 @@ type GossipManager struct {
 	Transceiver       *network.Transceiver          // Tranceiver instance
 	MembershipManager *membership.MembershipManager // Membership manager
 	SeenMessage       map[string]bool               // Seen messages
+	Mutex             *sync.Mutex                   // Mutex to protect the seen messages
 }
 
 // NewGossipManager creates a new gossip manager
@@ -24,6 +26,7 @@ func NewGossipManager(IPAddress string, transceiver *network.Transceiver, member
 		Transceiver:       transceiver,
 		MembershipManager: membershipManager,
 		SeenMessage:       make(map[string]bool),
+		Mutex:             &sync.Mutex{},
 	}
 }
 
@@ -36,6 +39,9 @@ func (mgr *GossipManager) Run(staleThreshold int64) {
 
 // Gossip sends a message to N random members
 func (mgr *GossipManager) Gossip(msg *message.Message) {
+	mgr.Mutex.Lock()
+	defer mgr.Mutex.Unlock()
+
 	// Check if the message has been seen before
 	if _, ok := mgr.SeenMessage[hashMessage(msg)]; ok {
 		return
@@ -61,6 +67,9 @@ func (mgr *GossipManager) Gossip(msg *message.Message) {
 
 // cleanSeenMessages cleans the seen messages
 func (mgr *GossipManager) cleanSeenMessages() {
+	mgr.Mutex.Lock()
+	defer mgr.Mutex.Unlock()
+
 	mgr.SeenMessage = make(map[string]bool)
 }
 

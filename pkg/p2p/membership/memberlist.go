@@ -3,6 +3,7 @@ package membership
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/utils"
 )
@@ -14,13 +15,15 @@ type Member struct {
 }
 
 type MemberList struct {
-	Members []*Member `json:"members"` // List of members
+	Members []*Member   `json:"members"` // List of members
+	Mutex   *sync.Mutex // Mutex to protect the member list
 }
 
 // NewMemberList creates a new member list
 func NewMemberList() *MemberList {
 	return &MemberList{
 		Members: []*Member{},
+		Mutex:   &sync.Mutex{},
 	}
 }
 
@@ -45,6 +48,9 @@ func DeserializeMemberList(data string) (*MemberList, error) {
 
 // UpdateMemberList updates the member list with the new list of members
 func (ml *MemberList) UpdateMemberList(newMemberList *MemberList, selfAddr string) {
+	ml.Mutex.Lock()
+	defer ml.Mutex.Unlock()
+
 	for _, newMember := range newMemberList.Members {
 		// Check if the member is self
 		if newMember.IPAddress == selfAddr {
@@ -63,6 +69,9 @@ func (ml *MemberList) UpdateMemberList(newMemberList *MemberList, selfAddr strin
 
 // FindMemberInList finds a member in the list by address
 func (ml *MemberList) FindMemberInList(address string) int {
+	ml.Mutex.Lock()
+	defer ml.Mutex.Unlock()
+
 	for i, member := range ml.Members {
 		if member.IPAddress == address {
 			return i
@@ -73,11 +82,17 @@ func (ml *MemberList) FindMemberInList(address string) int {
 
 // AddMemberToList adds a member to the list
 func (ml *MemberList) AddMemberToList(member *Member) {
+	ml.Mutex.Lock()
+	defer ml.Mutex.Unlock()
+
 	ml.Members = append(ml.Members, member)
 }
 
 // UpdateMemberInList updates a member in the list
 func (ml *MemberList) UpdateMemberInList(index int, newMember *Member) {
+	ml.Mutex.Lock()
+	defer ml.Mutex.Unlock()
+
 	// Check if the newMember is failed
 	if utils.GetCurrentTimeInUnix()-newMember.Timestamp > TIMENODEFAIL {
 		return
@@ -90,6 +105,9 @@ func (ml *MemberList) UpdateMemberInList(index int, newMember *Member) {
 
 // UpdateSelfInMemberList updates the self member in the member list
 func (ml *MemberList) UpdateSelfInMemberList(selfAddr string) {
+	ml.Mutex.Lock()
+	defer ml.Mutex.Unlock()
+
 	index := ml.FindMemberInList(selfAddr)
 	if index == -1 {
 		member := &Member{
@@ -106,6 +124,9 @@ func (ml *MemberList) UpdateSelfInMemberList(selfAddr string) {
 
 // RemoveFailedNodes removes failed nodes from the member list
 func (ml *MemberList) RemoveFailedMembers() {
+	ml.Mutex.Lock()
+	defer ml.Mutex.Unlock()
+
 	for i, member := range ml.Members {
 		if utils.GetCurrentTimeInUnix()-member.Timestamp > TIMENODEREMOVE {
 			ml.Members = append(ml.Members[:i], ml.Members[i+1:]...)

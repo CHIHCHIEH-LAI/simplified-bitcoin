@@ -42,6 +42,8 @@ func (bc *Blockchain) AddBlock(block *block.Block) error {
 
 	bc.Blocks = append(bc.Blocks, block)
 
+	bc.printBlockchain()
+
 	return nil
 }
 
@@ -64,4 +66,14 @@ func (bc *Blockchain) CalculateReward() float64 {
 // CalculateDifficulty calculates the difficulty for the miner
 func (bc *Blockchain) CalculateDifficulty() int {
 	return 5
+}
+
+// printBlockchain prints the blockchain
+func (bc *Blockchain) printBlockchain() {
+	bc.mutex.Lock()
+	defer bc.mutex.Unlock()
+
+	for _, block := range bc.Blocks {
+		block.PrintBlock()
+	}
 }

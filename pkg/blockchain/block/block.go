@@ -3,6 +3,7 @@ package block
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/transaction"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/utils"
@@ -108,4 +109,18 @@ func ComputeMerkleRoot(transactions []*transaction.Transaction) string {
 
 	// The last remaining hash is the Merkle Root
 	return transactionHashes[0]
+}
+
+// PrintBlock prints the block
+func (b *Block) PrintBlock() {
+	log.Printf("Block ID: %s\n", b.BlockID)
+	log.Printf("Prev Hash: %s\n", b.PrevHash)
+	log.Printf("Merkle Root: %s\n", b.MerkleRoot)
+	log.Printf("Timestamp: %d\n", b.Timestamp)
+	log.Printf("Nonce: %d\n", b.Nonce)
+	log.Printf("Difficulty: %d\n", b.Difficulty)
+	for _, tx := range b.Transactions {
+		tx.PrintTransaction()
+	}
+	log.Println()
 }
