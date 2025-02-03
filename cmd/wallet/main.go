@@ -6,11 +6,11 @@ import (
 	"log"
 	"os"
 
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/wallet"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/wallet"
 )
 
 var (
-	address           string  // Address of the node (e.g., "127.0.0.1:8080")
+	IPAddress         string  // Address of the node (e.g., "127.0.0.1:8080")
 	bootstrapNodeAddr string  // Address of the bootstrap node to join the network
 	action            string  // Action to perform: createWallet, createTx
 	walletFile        string  // Filename for saving the wallet
@@ -21,11 +21,11 @@ var (
 
 func init() {
 	// Define command-line flags
-	flag.StringVar(&address, "address", "", "IP address of the node (e.g., 127.0.0.1:8080")
+	flag.StringVar(&IPAddress, "address", "", "IP address of the node (e.g., 127.0.0.1:8080")
 	flag.StringVar(&bootstrapNodeAddr, "bootstrap", "", "Address of the bootstrap node to join the network")
 	flag.StringVar(&action, "action", "create", "Action to perform: 'createWallet', 'createTx'")
 	flag.StringVar(&walletFile, "wallet", "wallet.json", "Filename for saving the wallet")
-	flag.StringVar(&recipient, "recipient", "", "Recipient address for the transaction")
+	flag.StringVar(&recipient, "recipient", "827c60efba743153785e6f790ddda0a1d5412608e3633c8808a44da10d7ce6c", "Recipient address for the transaction")
 	flag.Float64Var(&amount, "amount", 0.0, "Amount to send in the transaction")
 	flag.Float64Var(&fee, "fee", 0.0, "Transaction fee")
 }
@@ -75,7 +75,7 @@ func createTransaction() {
 	fmt.Printf("Transaction created!\nID: %s\n", tx.TransactionID)
 
 	// Send the transaction to the network
-	err = w.SendTransaction(tx, address, bootstrapNodeAddr)
+	err = w.SendTransaction(tx, IPAddress, bootstrapNodeAddr)
 	if err != nil {
 		log.Fatalf("Failed to send transaction: %v\n", err)
 	}
