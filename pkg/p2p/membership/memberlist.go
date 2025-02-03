@@ -23,6 +23,7 @@ type MemberList struct {
 func NewMemberList() *MemberList {
 	return &MemberList{
 		Members: []*Member{},
+		Mutex:   &sync.Mutex{},
 	}
 }
 
