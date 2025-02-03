@@ -84,3 +84,14 @@ func SortTransactionsByFee(transactions []*Transaction) {
 		return transactions[i].Fee > transactions[j].Fee
 	})
 }
+
+// PrintTransaction prints the transaction
+func (tx *Transaction) PrintTransaction() {
+	fmt.Printf("Transaction ID: %s\n", tx.TransactionID)
+	fmt.Printf("Sender: %s\n", tx.Sender)
+	fmt.Printf("Recipient: %s\n", tx.Recipient)
+	fmt.Printf("Amount: %f\n", tx.Amount)
+	fmt.Printf("Fee: %f\n", tx.Fee)
+	fmt.Printf("Timestamp: %d\n", tx.Timestamp)
+	fmt.Printf("Signature: %s\n", tx.Signature)
+}

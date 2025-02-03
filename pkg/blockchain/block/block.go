@@ -109,3 +109,18 @@ func ComputeMerkleRoot(transactions []*transaction.Transaction) string {
 	// The last remaining hash is the Merkle Root
 	return transactionHashes[0]
 }
+
+// PrintBlock prints the block
+func (b *Block) PrintBlock() {
+	fmt.Printf("Block ID: %s\n", b.BlockID)
+	fmt.Printf("PrevHash: %s\n", b.PrevHash)
+	fmt.Printf("MerkleRoot: %s\n", b.MerkleRoot)
+	fmt.Printf("Timestamp: %d\n", b.Timestamp)
+	fmt.Printf("Nonce: %d\n", b.Nonce)
+	fmt.Printf("Difficulty: %d\n", b.Difficulty)
+	fmt.Printf("Transactions:\n")
+	for _, tx := range b.Transactions {
+		tx.PrintTransaction()
+	}
+	fmt.Println()
+}
