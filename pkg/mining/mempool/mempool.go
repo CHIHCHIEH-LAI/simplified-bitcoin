@@ -66,6 +66,9 @@ func (mp *Mempool) RemoveTransactionsInBlock(block *block.Block) {
 
 // RemoveTransaction removes a transaction from the pool
 func (mp *Mempool) RemoveTransaction(txID string) error {
+	mp.Mutex.Lock()
+	defer mp.Mutex.Unlock()
+
 	if mp.Transactions[txID] == nil {
 		return fmt.Errorf("transaction with ID %s does not exist", txID)
 	}
