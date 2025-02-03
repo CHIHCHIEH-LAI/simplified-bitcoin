@@ -32,8 +32,6 @@ func (bc *Blockchain) NewBlock(transactions []*transaction.Transaction, miner st
 
 // AddBlock adds a new block to the blockchain
 func (bc *Blockchain) AddBlock(block *block.Block) error {
-	bc.mutex.Lock()
-	defer bc.mutex.Unlock()
 
 	// Validate the block
 	if err := bc.ValidateBlock(block); err != nil {
@@ -42,24 +40,16 @@ func (bc *Blockchain) AddBlock(block *block.Block) error {
 
 	bc.Blocks = append(bc.Blocks, block)
 
-	bc.printBlockchain()
-
 	return nil
 }
 
 // GetLatestBlock returns the latest block in the blockchain
 func (bc *Blockchain) GetLatestBlock() *block.Block {
-	bc.mutex.Lock()
-	defer bc.mutex.Unlock()
-
 	return bc.Blocks[len(bc.Blocks)-1]
 }
 
 // CalculateReward calculates the reward for the miner
 func (bc *Blockchain) CalculateReward() float64 {
-	bc.mutex.Lock()
-	defer bc.mutex.Unlock()
-
 	return bc.BaseReward / float64(len(bc.Blocks))
 }
 
@@ -69,10 +59,7 @@ func (bc *Blockchain) CalculateDifficulty() int {
 }
 
 // printBlockchain prints the blockchain
-func (bc *Blockchain) printBlockchain() {
-	bc.mutex.Lock()
-	defer bc.mutex.Unlock()
-
+func (bc *Blockchain) PrintBlockchain() {
 	for _, block := range bc.Blocks {
 		block.PrintBlock()
 	}
