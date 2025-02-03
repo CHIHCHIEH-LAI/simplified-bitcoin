@@ -49,11 +49,15 @@ func (bc *Blockchain) AddBlock(block *block.Block) error {
 func (bc *Blockchain) GetLatestBlock() *block.Block {
 	bc.mutex.Lock()
 	defer bc.mutex.Unlock()
+
 	return bc.Blocks[len(bc.Blocks)-1]
 }
 
 // CalculateReward calculates the reward for the miner
 func (bc *Blockchain) CalculateReward() float64 {
+	bc.mutex.Lock()
+	defer bc.mutex.Unlock()
+
 	return bc.BaseReward / float64(len(bc.Blocks))
 }
 
