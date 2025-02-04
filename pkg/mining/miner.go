@@ -43,9 +43,6 @@ func NewMiner(
 
 // Run starts the mining loop
 func (miner *Miner) Run() {
-	miner.Mutex.Lock()
-	defer miner.Mutex.Unlock()
-
 	// Prevent duplicate mining sessions
 	if miner.MiningActive {
 		log.Println("Mining is already running.")
@@ -126,9 +123,6 @@ func (miner *Miner) BroadcastBlock(b *block.Block) {
 
 // StopMining stops the current mining process
 func (miner *Miner) Stop() {
-	miner.Mutex.Lock()
-	defer miner.Mutex.Unlock()
-
 	if !miner.MiningActive {
 		log.Println("Mining is already stopped.")
 		return

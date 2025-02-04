@@ -51,9 +51,12 @@ func (b *Block) validateDifficulty() error {
 
 // ValidateTransactions validates the transactions
 func (b *Block) validateTransactions() error {
-	for _, tx := range b.Transactions {
-		if err := tx.Validate(); err != nil {
-			return fmt.Errorf("invalid transaction: %v", err)
+	for i, tx := range b.Transactions {
+		// Skip if the transaction is coinbase
+		if i != 0 {
+			if err := tx.Validate(); err != nil {
+				return fmt.Errorf("invalid transaction: %v", err)
+			}
 		}
 	}
 

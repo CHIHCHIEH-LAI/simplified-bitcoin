@@ -37,4 +37,6 @@ Explanation of Flags
 go run cmd/wallet/main.go -address=127.0.0.1:8081 -bootstrap=127.0.0.1:8080 -action=createTx -wallet=wallet.json -recipient=827c60efba743153785e6f790ddda0a1d5412608e3633c8808a44da10d7ce6c5 -amount=0.01 -fee=0.001
 ```
 
-## Improvements
+Explanation of Flags
+- -action: Action to perform
+- -wallet: The filename for saving the wallet
