@@ -12,14 +12,14 @@ import (
 
 type Mempool struct {
 	Transactions map[string]*transaction.Transaction // TransactionID -> Transaction
-	Mutex        *sync.Mutex                         // Mutex for the mempool
+	Mutex        *sync.RWMutex                       // Mutex for the mempool
 }
 
 // NewMempool creates a new mempool
 func NewMempool() *Mempool {
 	return &Mempool{
 		Transactions: make(map[string]*transaction.Transaction),
-		Mutex:        &sync.Mutex{},
+		Mutex:        &sync.RWMutex{},
 	}
 }
 
@@ -39,11 +39,11 @@ func (mp *Mempool) HandleNewTransaction(msg *message.Message) {
 	}
 
 	// Add the transaction to the pool
-	mp.AddTransaction(tx)
+	mp.addTransaction(tx)
 }
 
 // AddTransaction adds a transaction to the pool
-func (mp *Mempool) AddTransaction(tx *transaction.Transaction) error {
+func (mp *Mempool) addTransaction(tx *transaction.Transaction) error {
 	mp.Mutex.Lock()
 	defer mp.Mutex.Unlock()
 
@@ -60,15 +60,12 @@ func (mp *Mempool) RemoveTransactionsInBlock(block *block.Block) {
 	defer mp.Mutex.Unlock()
 
 	for _, tx := range block.Transactions {
-		delete(mp.Transactions, tx.TransactionID)
+		mp.removeTransaction(tx.TransactionID)
 	}
 }
 
 // RemoveTransaction removes a transaction from the pool
-func (mp *Mempool) RemoveTransaction(txID string) error {
-	mp.Mutex.Lock()
-	defer mp.Mutex.Unlock()
-
+func (mp *Mempool) removeTransaction(txID string) error {
 	if mp.Transactions[txID] == nil {
 		return fmt.Errorf("transaction with ID %s does not exist", txID)
 	}
@@ -78,8 +75,8 @@ func (mp *Mempool) RemoveTransaction(txID string) error {
 
 // GetTopNRewardingTransactions returns the top N rewarding transactions
 func (mp *Mempool) GetTopNRewardingTransactions(n int) []*transaction.Transaction {
-	mp.Mutex.Lock()
-	defer mp.Mutex.Unlock()
+	mp.Mutex.RLock()
+	defer mp.Mutex.RUnlock()
 
 	// Convert the map to a slice
 	txSlice := make([]*transaction.Transaction, 0, len(mp.Transactions))
