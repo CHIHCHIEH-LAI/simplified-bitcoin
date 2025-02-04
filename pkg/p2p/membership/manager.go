@@ -36,11 +36,17 @@ func (mgr *MembershipManager) Run(bootstrapNodeAddr string) {
 }
 
 func (mgr *MembershipManager) GetNumberOfMembers() int {
+	mgr.MemberList.Mutex.RLock()
+	defer mgr.MemberList.Mutex.RUnlock()
+
 	return len(mgr.MemberList.Members)
 }
 
 // SelectMembers selects n_member random members from the member list
 func (mgr *MembershipManager) SelectNMembers(n_target int) []*Member {
+	mgr.MemberList.Mutex.RLock()
+	defer mgr.MemberList.Mutex.RUnlock()
+
 	selectedMembers := make(map[int]bool)
 	limit := min(n_target, len(mgr.MemberList.Members)-1)
 

@@ -24,12 +24,13 @@ func (mgr *MembershipManager) JoinGroup(bootstrapNodeAddress string) {
 
 // IntroduceSelfToGroup sends a JOINREQ message to the bootstrap node
 func (mgr *MembershipManager) IntroduceSelfToGroup() {
-	// Add self to the member list
-	member := &Member{
-		IPAddress: mgr.IPAddress,
-		Heartbeat: 0,
-		Timestamp: utils.GetCurrentTimeInUnix(),
-	}
+	// Create a new member
+	member := NewMember(mgr.IPAddress)
+
+	mgr.MemberList.Mutex.Lock()
+	defer mgr.MemberList.Mutex.Unlock()
+
+	// Add the new member to the member list
 	mgr.MemberList.AddMemberToList(member)
 }
 
@@ -59,18 +60,11 @@ func NewJOINRESPMessage(selfAddr, receipient, payload string) *message.Message {
 func (mgr *MembershipManager) HandleJoinRequest(msg *message.Message) {
 	requester := msg.Sender
 
-	member := &Member{
-		IPAddress: requester,
-		Heartbeat: 0,
-		Timestamp: utils.GetCurrentTimeInUnix(),
-	}
+	// Create a new member
+	member := NewMember(requester)
 
-	// Check if the sender is already in the member list
-	if index := mgr.MemberList.FindMemberInList(requester); index == -1 {
-		mgr.MemberList.AddMemberToList(member)
-	} else {
-		mgr.MemberList.UpdateMemberInList(index, member)
-	}
+	// Add the new member to the member list
+	mgr.MemberList.AddOrUpdateMemberInList(member)
 
 	// Send JOINREP message to the sender with the current member list
 	payload, err := mgr.MemberList.Serialize()
