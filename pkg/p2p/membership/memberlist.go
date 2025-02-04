@@ -15,15 +15,24 @@ type Member struct {
 }
 
 type MemberList struct {
-	Members []*Member   `json:"members"` // List of members
-	Mutex   *sync.Mutex // Mutex to protect the member list
+	Members []*Member     `json:"members"` // List of members
+	Mutex   *sync.RWMutex // Mutex to protect the member list
+}
+
+// NewMember creates a new member
+func NewMember(address string) *Member {
+	return &Member{
+		IPAddress: address,
+		Heartbeat: 0,
+		Timestamp: utils.GetCurrentTimeInUnix(),
+	}
 }
 
 // NewMemberList creates a new member list
 func NewMemberList() *MemberList {
 	return &MemberList{
 		Members: []*Member{},
-		Mutex:   &sync.Mutex{},
+		Mutex:   &sync.RWMutex{},
 	}
 }
 
@@ -48,9 +57,6 @@ func DeserializeMemberList(data string) (*MemberList, error) {
 
 // UpdateMemberList updates the member list with the new list of members
 func (ml *MemberList) UpdateMemberList(newMemberList *MemberList, selfAddr string) {
-	ml.Mutex.Lock()
-	defer ml.Mutex.Unlock()
-
 	for _, newMember := range newMemberList.Members {
 		// Check if the member is self
 		if newMember.IPAddress == selfAddr {
@@ -58,20 +64,12 @@ func (ml *MemberList) UpdateMemberList(newMemberList *MemberList, selfAddr strin
 		}
 
 		// Find the member in the list
-		index := ml.FindMemberInList(newMember.IPAddress)
-		if index == -1 { // Add the member if it does not exist
-			ml.AddMemberToList(newMember)
-		} else if newMember.Heartbeat > ml.Members[index].Heartbeat { // Update the member if the heartbeat is greater
-			ml.UpdateMemberInList(index, newMember)
-		}
+		ml.AddOrUpdateMemberInList(newMember)
 	}
 }
 
 // FindMemberInList finds a member in the list by address
 func (ml *MemberList) FindMemberInList(address string) int {
-	ml.Mutex.Lock()
-	defer ml.Mutex.Unlock()
-
 	for i, member := range ml.Members {
 		if member.IPAddress == address {
 			return i
@@ -80,19 +78,26 @@ func (ml *MemberList) FindMemberInList(address string) int {
 	return -1
 }
 
-// AddMemberToList adds a member to the list
-func (ml *MemberList) AddMemberToList(member *Member) {
+// AddOrUpdateMemberInList adds or updates a member in the list
+func (ml *MemberList) AddOrUpdateMemberInList(member *Member) {
 	ml.Mutex.Lock()
 	defer ml.Mutex.Unlock()
 
+	index := ml.FindMemberInList(member.IPAddress)
+	if index == -1 {
+		ml.AddMemberToList(member)
+	} else {
+		ml.UpdateMemberInList(index, member)
+	}
+}
+
+// AddMemberToList adds a member to the list
+func (ml *MemberList) AddMemberToList(member *Member) {
 	ml.Members = append(ml.Members, member)
 }
 
 // UpdateMemberInList updates a member in the list
 func (ml *MemberList) UpdateMemberInList(index int, newMember *Member) {
-	ml.Mutex.Lock()
-	defer ml.Mutex.Unlock()
-
 	// Check if the newMember is failed
 	if utils.GetCurrentTimeInUnix()-newMember.Timestamp > TIMENODEFAIL {
 		return
