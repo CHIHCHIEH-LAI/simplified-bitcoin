@@ -8,17 +8,20 @@ import (
 )
 
 type Blockchain struct {
-	BaseReward float64
-	Blocks     []*block.Block `json:"blocks"` // Blocks in the blockchain
-	mutex      *sync.RWMutex  // Mutex to protect the blockchain
+	BaseReward    float64
+	Blocks        []*block.Block `json:"blocks"` // Blocks in the blockchain
+	mutex         *sync.RWMutex  // Mutex to protect the blockchain
+	CumulativePoW int            `json:"cumulativePoW"` // Tracks total proof-of-work (sum of difficulties)
 }
 
 // NewBlockchain creates a new blockchain with the genesis block
 func NewBlockchain() *Blockchain {
+	genesisBlock := block.NewGenesisBlock()
 	return &Blockchain{
-		BaseReward: 1000.0,
-		Blocks:     []*block.Block{block.NewGenesisBlock()},
-		mutex:      &sync.RWMutex{},
+		BaseReward:    1000.0,
+		Blocks:        []*block.Block{genesisBlock},
+		mutex:         &sync.RWMutex{},
+		CumulativePoW: genesisBlock.Difficulty,
 	}
 }
 
@@ -44,6 +47,7 @@ func (bc *Blockchain) AddBlock(block *block.Block) error {
 	}
 
 	bc.Blocks = append(bc.Blocks, block)
+	bc.CumulativePoW += block.Difficulty
 
 	return nil
 }
