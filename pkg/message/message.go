@@ -13,6 +13,7 @@ const (
 	HEARTBEAT      = "HEARTBEAT"
 	NEWTRANSACTION = "NEWTRANSACTION"
 	NEWBLOCK       = "NEWBLOCK"
+	BLOCKCHAIN     = "BLOCKCHAIN"
 )
 
 type Message struct {
