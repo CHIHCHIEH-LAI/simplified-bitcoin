@@ -104,11 +104,22 @@ func (node *Node) handleIncomingMessage() {
 			node.Mempool.HandleNewTransaction(msg)
 		case message.NEWBLOCK:
 			node.GossipManager.Gossip(msg)
-			node.Miner.Stop()
 			block, _ := block.DeserializeBlock(msg.Payload)
-			node.Mempool.RemoveTransactionsInBlock(block)
-			node.Blockchain.AddBlock(block)
-			go node.Miner.Run()
+			if err := node.Blockchain.ValidateBlock(block); err != nil {
+				log.Printf("Invalid block: %s\n", err)
+				node.AskForBlockchain(msg.Sender)
+			} else {
+				node.Miner.Stop()
+				node.Mempool.RemoveTransactionsInBlock(block)
+				node.Blockchain.AddBlock(block)
+				go node.Miner.Run()
+			}
+		case message.BLOCKCHAINREQ:
+			sender := msg.Sender
+			node.ShareBlockchain(sender)
+		case message.BLOCKCHAINRESP:
+			blockchain, _ := blockchain.DeserializeBlockchain(msg.Payload)
+			node.Blockchain.ReplaceChain(blockchain)
 		default:
 			log.Printf("Unknown message type: %s\n", msg.Type)
 		}
@@ -125,4 +136,15 @@ func (node *Node) Close() {
 
 	// Close the miner
 	node.Miner.Close()
+}
+
+func (node *Node) AskForBlockchain(address string) {
+	msg := message.NewMessage(message.BLOCKCHAINREQ, node.Address, address, "")
+	node.Transceiver.Transmit(msg)
+}
+
+func (node *Node) ShareBlockchain(address string) {
+	payload, _ := node.Blockchain.Serialize()
+	msg := message.NewMessage(message.BLOCKCHAINRESP, node.Address, address, payload)
+	node.Transceiver.Transmit(msg)
 }
