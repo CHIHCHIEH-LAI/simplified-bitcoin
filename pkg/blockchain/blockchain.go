@@ -1,6 +1,8 @@
 package blockchain
 
 import (
+	"encoding/json"
+	"fmt"
 	"sync"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/block"
@@ -67,12 +69,13 @@ func (bc *Blockchain) CalculateDifficulty() int {
 	return 10
 }
 
-// printBlockchain prints the blockchain
-func (bc *Blockchain) PrintBlockchain() {
+func (bc *Blockchain) Serialize() (string, error) {
 	bc.mutex.RLock()
 	defer bc.mutex.RUnlock()
 
-	for _, block := range bc.Blocks {
-		block.PrintBlock()
+	data, err := json.Marshal(bc)
+	if err != nil {
+		return "", fmt.Errorf("failed to serialize block: %v", err)
 	}
+	return string(data), nil
 }
