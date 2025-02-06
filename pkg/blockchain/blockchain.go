@@ -69,6 +69,7 @@ func (bc *Blockchain) CalculateDifficulty() int {
 	return 10
 }
 
+// Serialize serializes the blockchain to a JSON string
 func (bc *Blockchain) Serialize() (string, error) {
 	bc.mutex.RLock()
 	defer bc.mutex.RUnlock()
@@ -78,4 +79,14 @@ func (bc *Blockchain) Serialize() (string, error) {
 		return "", fmt.Errorf("failed to serialize block: %v", err)
 	}
 	return string(data), nil
+}
+
+// DeserializeBlockchain deserializes a JSON string to a blockchain
+func DeserializeBlockchain(data string) (*Blockchain, error) {
+	var bc Blockchain
+	err := json.Unmarshal([]byte(data), &bc)
+	if err != nil {
+		return nil, fmt.Errorf("failed to deserialize blockchain: %v", err)
+	}
+	return &bc, nil
 }
