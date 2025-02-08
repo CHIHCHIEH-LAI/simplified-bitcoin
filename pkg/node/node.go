@@ -110,7 +110,6 @@ func (node *Node) handleIncomingMessage() {
 				node.AskForBlockchain(msg.Sender)
 			} else {
 				node.Miner.Stop()
-				node.Mempool.RemoveTransactionsInBlock(block)
 				node.Blockchain.AddBlock(block)
 				go node.Miner.Run()
 			}
@@ -119,7 +118,13 @@ func (node *Node) handleIncomingMessage() {
 			node.ShareBlockchain(sender)
 		case message.BLOCKCHAINRESP:
 			blockchain, _ := blockchain.DeserializeBlockchain(msg.Payload)
-			node.Blockchain.ReplaceChain(blockchain)
+			if err := node.Blockchain.ShouldSwitchChain(blockchain); err != nil {
+				log.Printf("Invalid blockchain: %s\n", err)
+			} else {
+				node.Miner.Stop()
+				node.Blockchain.SwitchChain(blockchain)
+				go node.Miner.Run()
+			}
 		default:
 			log.Printf("Unknown message type: %s\n", msg.Type)
 		}
