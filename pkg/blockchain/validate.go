@@ -31,6 +31,11 @@ func (bc *Blockchain) ValidateBlock(b *block.Block) error {
 	return nil
 }
 
+// ValidateChain validates the chain
+func (bc *Blockchain) ValidateChain(newChain *Blockchain) error {
+	return nil
+}
+
 // validatePrevHash validates the previous hash
 func (bc *Blockchain) validatePrevHash(b *block.Block) error {
 	latestBlock := bc.GetLatestBlock()
