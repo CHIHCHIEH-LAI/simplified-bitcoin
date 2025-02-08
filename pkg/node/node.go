@@ -38,14 +38,14 @@ func NewNode(IPAddress, port, address string) (*Node, error) {
 	// Create a new membership manager
 	membershipManager := membership.NewMembershipManager(IPAddress, transceiver)
 
+	// Create a Mempool
+	mempool := mempool.NewMempool()
+
 	// Create a Blockchain
-	blockchain := blockchain.NewBlockchain()
+	blockchain := blockchain.NewBlockchain(mempool)
 
 	// Create a Gossip Manager
 	gossipManager := gossip.NewGossipManager(IPAddress, transceiver, membershipManager)
-
-	// Create a Mempool
-	mempool := mempool.NewMempool()
 
 	// Create a Miner
 	miner := mining.NewMiner(address, blockchain, gossipManager, mempool)
