@@ -54,6 +54,11 @@ func (bc *Blockchain) AddBlock(block *block.Block) error {
 	bc.Blocks = append(bc.Blocks, block)
 	bc.CumulativePoW += block.Difficulty
 
+	// Remove transactions in the block from the mempool
+	for _, tx := range block.Transactions {
+		bc.Mempool.RemoveTransaction(tx.TransactionID)
+	}
+
 	return nil
 }
 
