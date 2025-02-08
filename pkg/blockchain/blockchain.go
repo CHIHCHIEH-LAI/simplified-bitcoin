@@ -7,23 +7,26 @@ import (
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/block"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/transaction"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/mining/mempool"
 )
 
 type Blockchain struct {
 	BaseReward    float64
-	Blocks        []*block.Block `json:"blocks"` // Blocks in the blockchain
-	mutex         *sync.RWMutex  // Mutex to protect the blockchain
-	CumulativePoW int            `json:"cumulativePoW"` // Tracks total proof-of-work (sum of difficulties)
+	Blocks        []*block.Block   `json:"blocks"` // Blocks in the blockchain
+	mutex         *sync.RWMutex    // Mutex to protect the blockchain
+	CumulativePoW int              `json:"cumulativePoW"` // Tracks total proof-of-work (sum of difficulties)
+	Mempool       *mempool.Mempool // Reference to the mempool
 }
 
 // NewBlockchain creates a new blockchain with the genesis block
-func NewBlockchain() *Blockchain {
+func NewBlockchain(mempool *mempool.Mempool) *Blockchain {
 	genesisBlock := block.NewGenesisBlock()
 	return &Blockchain{
 		BaseReward:    1000.0,
 		Blocks:        []*block.Block{genesisBlock},
 		mutex:         &sync.RWMutex{},
 		CumulativePoW: genesisBlock.Difficulty,
+		Mempool:       mempool,
 	}
 }
 
