@@ -60,12 +60,21 @@ func (mp *Mempool) RemoveTransactionsInBlock(block *block.Block) {
 	defer mp.Mutex.Unlock()
 
 	for _, tx := range block.Transactions {
-		mp.removeTransaction(tx.TransactionID)
+		mp.RemoveTransaction(tx.TransactionID)
+	}
+}
+
+func (mp *Mempool) RemoveTransactions(transactionIds []string) {
+	mp.Mutex.Lock()
+	defer mp.Mutex.Unlock()
+
+	for _, txID := range transactionIds {
+		mp.RemoveTransaction(txID)
 	}
 }
 
 // RemoveTransaction removes a transaction from the pool
-func (mp *Mempool) removeTransaction(txID string) error {
+func (mp *Mempool) RemoveTransaction(txID string) error {
 	if mp.Transactions[txID] == nil {
 		return fmt.Errorf("transaction with ID %s does not exist", txID)
 	}
