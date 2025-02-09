@@ -6,7 +6,7 @@ import "fmt"
 func (bc *Blockchain) ShouldSwitchChain(fork *Blockchain) error {
 
 	// Validate the new chain
-	if err := bc.ValidateChain(fork); err != nil {
+	if err := fork.Validate(); err != nil {
 		return err
 	}
 
