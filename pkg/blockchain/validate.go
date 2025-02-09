@@ -6,6 +6,32 @@ import (
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/block"
 )
 
+// Validate validates the blockchain
+func (bc *Blockchain) Validate() error {
+	// Validate the cumulative PoW
+	if err := bc.validateCumulativePoW(); err != nil {
+		return err
+	}
+
+	// Validate the blocks
+	for _, b := range bc.Blocks {
+		if err := bc.ValidateBlock(b); err != nil {
+			return fmt.Errorf("invalid block: %s", b.BlockID)
+		}
+	}
+
+	return nil
+}
+
+// validateCumulativePoW validates the cumulative PoW
+func (bc *Blockchain) validateCumulativePoW() error {
+	cumulativePoW := bc.CalculateCumulativePoW()
+	if bc.CumulativePoW != cumulativePoW {
+		return fmt.Errorf("invalid cumulative PoW: %d", bc.CumulativePoW)
+	}
+	return nil
+}
+
 // ValidateBlock validates the block
 func (bc *Blockchain) ValidateBlock(b *block.Block) error {
 	// Validate the previous hash
@@ -28,11 +54,6 @@ func (bc *Blockchain) ValidateBlock(b *block.Block) error {
 		return err
 	}
 
-	return nil
-}
-
-// ValidateChain validates the chain
-func (bc *Blockchain) ValidateChain(newChain *Blockchain) error {
 	return nil
 }
 
