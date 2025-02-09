@@ -77,6 +77,15 @@ func (bc *Blockchain) CalculateDifficulty() int {
 	return 10
 }
 
+// CalculateCumulativePoW calculates the cumulative proof-of-work
+func (bc *Blockchain) CalculateCumulativePoW() int {
+	cumulativePoW := 0
+	for _, b := range bc.Blocks {
+		cumulativePoW += b.Difficulty
+	}
+	return cumulativePoW
+}
+
 // Serialize serializes the blockchain to a JSON string
 func (bc *Blockchain) Serialize() (string, error) {
 	bc.mutex.RLock()
