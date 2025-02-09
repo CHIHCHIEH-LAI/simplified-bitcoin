@@ -39,11 +39,11 @@ func (mp *Mempool) HandleNewTransaction(msg *message.Message) {
 	}
 
 	// Add the transaction to the pool
-	mp.addTransaction(tx)
+	mp.AddTransaction(tx)
 }
 
 // AddTransaction adds a transaction to the pool
-func (mp *Mempool) addTransaction(tx *transaction.Transaction) error {
+func (mp *Mempool) AddTransaction(tx *transaction.Transaction) error {
 	mp.Mutex.Lock()
 	defer mp.Mutex.Unlock()
 
