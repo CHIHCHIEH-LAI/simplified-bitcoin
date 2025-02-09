@@ -74,7 +74,7 @@ func (bc *Blockchain) CalculateReward() float64 {
 
 // CalculateDifficulty calculates the difficulty for the miner
 func (bc *Blockchain) CalculateDifficulty() int {
-	return 10
+	return 7
 }
 
 // CalculateCumulativePoW calculates the cumulative proof-of-work
