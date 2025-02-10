@@ -68,8 +68,8 @@ func (tx *Transaction) validateRecipient() error {
 
 // validateAmount checks if the amount is valid
 func (tx *Transaction) validateAmount() error {
-	if tx.Amount <= 0 {
-		return fmt.Errorf("amount must be greater than zero")
+	if tx.Amount < 0 {
+		return fmt.Errorf("amount must be greater than or equal to 0")
 	}
 	return nil
 }
@@ -77,7 +77,7 @@ func (tx *Transaction) validateAmount() error {
 // validateFee checks if the fee is valid
 func (tx *Transaction) validateFee() error {
 	if tx.Fee < 0 {
-		return fmt.Errorf("fee cannot be negative")
+		return fmt.Errorf("fee must be greater than or equal to 0")
 	}
 	return nil
 }
