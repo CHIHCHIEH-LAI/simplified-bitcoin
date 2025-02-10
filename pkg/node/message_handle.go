@@ -113,7 +113,6 @@ func (node *Node) handleNewBlockMsg(msg *message.Message) {
 	} else {
 		node.Miner.Stop()
 		node.Blockchain.AddBlock(block)
-		node.Blockchain.Print()
 		go node.Miner.Run()
 	}
 }
@@ -133,7 +132,6 @@ func (node *Node) handleBlockchainResponse(msg *message.Message) {
 	} else {
 		node.Miner.Stop()
 		node.Blockchain.SwitchChain(blockchain)
-		node.Blockchain.Print()
 		go node.Miner.Run()
 	}
 }
