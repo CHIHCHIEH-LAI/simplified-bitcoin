@@ -31,7 +31,7 @@ func NewBlockchain(mempool *mempool.Mempool) *Blockchain {
 }
 
 // NewBlock creates a new block with the given transactions
-func (bc *Blockchain) NewBlock(transactions []*transaction.Transaction, miner string) *block.Block {
+func (bc *Blockchain) NewBlock(transactions []*transaction.Transaction, miner string, total_fees float64) *block.Block {
 	bc.mutex.RLock()
 	defer bc.mutex.RUnlock()
 
