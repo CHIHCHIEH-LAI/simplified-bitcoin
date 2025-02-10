@@ -1,11 +1,7 @@
 package node
 
 import (
-	"log"
-
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/block"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/mining"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/mining/mempool"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/network"
@@ -83,54 +79,6 @@ func (node *Node) Run(bootstrapNodeAddr string) error {
 	return nil
 }
 
-// HandleIncomingMessage processes incoming messages
-func (node *Node) handleIncomingMessage() {
-	for {
-		msg, ok := node.Transceiver.Receive()
-		if !ok {
-			continue // Skip iteration if no message
-		}
-
-		// Process the message based on its type
-		switch msg.Type {
-		case message.JOINREQ:
-			node.MembershipManager.HandleJoinRequest(msg)
-		case message.JOINRESP:
-			node.MembershipManager.HandleJoinResponse(msg)
-		case message.HEARTBEAT:
-			node.MembershipManager.HandleHeartbeat(msg)
-		case message.NEWTRANSACTION:
-			node.GossipManager.Gossip(msg)
-			node.Mempool.HandleNewTransaction(msg)
-		case message.NEWBLOCK:
-			node.GossipManager.Gossip(msg)
-			block, _ := block.DeserializeBlock(msg.Payload)
-			if err := node.Blockchain.ValidateBlock(block); err != nil {
-				log.Printf("Invalid block: %s\n", err)
-				node.AskForBlockchain(msg.Sender)
-			} else {
-				node.Miner.Stop()
-				node.Blockchain.AddBlock(block)
-				go node.Miner.Run()
-			}
-		case message.BLOCKCHAINREQ:
-			sender := msg.Sender
-			node.ShareBlockchain(sender)
-		case message.BLOCKCHAINRESP:
-			blockchain, _ := blockchain.DeserializeBlockchain(msg.Payload)
-			if err := node.Blockchain.ShouldSwitchChain(blockchain); err != nil {
-				log.Printf("Invalid blockchain: %s\n", err)
-			} else {
-				node.Miner.Stop()
-				node.Blockchain.SwitchChain(blockchain)
-				go node.Miner.Run()
-			}
-		default:
-			log.Printf("Unknown message type: %s\n", msg.Type)
-		}
-	}
-}
-
 // Close closes the P2P node
 func (node *Node) Close() {
 	// Close the tranceiver
@@ -141,15 +89,4 @@ func (node *Node) Close() {
 
 	// Close the miner
 	node.Miner.Close()
-}
-
-func (node *Node) AskForBlockchain(IPAddress string) {
-	msg := message.NewMessage(message.BLOCKCHAINREQ, node.IPAddress, IPAddress, "")
-	node.Transceiver.Transmit(msg)
-}
-
-func (node *Node) ShareBlockchain(IPAddress string) {
-	payload, _ := node.Blockchain.Serialize()
-	msg := message.NewMessage(message.BLOCKCHAINRESP, node.IPAddress, IPAddress, payload)
-	node.Transceiver.Transmit(msg)
 }
