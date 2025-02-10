@@ -50,6 +50,11 @@ func (bc *Blockchain) ValidateBlock(b *block.Block) error {
 		return err
 	}
 
+	// Validate the coinbase transaction amount
+	if err := bc.validateCoinbaseTxAmount(b); err != nil {
+		return err
+	}
+
 	// Validate the block
 	if err := b.Validate(); err != nil {
 		return err
@@ -84,6 +89,22 @@ func (bc *Blockchain) validateReward(b *block.Block) error {
 	}
 
 	return nil
+}
+
+// validateCoinbaseTxAmount validates the coinbase transaction amount
+func (bc *Blockchain) validateCoinbaseTxAmount(b *block.Block) error {
+	total_fees := 0.0
+	for _, tx := range b.Transactions[1:] {
+		total_fees += tx.Fee
+	}
+
+	coinbaseTx := b.Transactions[0]
+	if coinbaseTx.Amount != total_fees+bc.CalculateReward() {
+		return fmt.Errorf("invalid coinbase transaction amount: %f", coinbaseTx.Amount)
+	}
+
+	return nil
+
 }
 
 func (bc *Blockchain) ValidateTransaction(tx *transaction.Transaction) error {
