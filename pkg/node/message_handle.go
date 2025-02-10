@@ -7,6 +7,7 @@ import (
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/block"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/transaction"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/message"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/p2p/membership"
 )
 
 // HandleIncomingMessage processes incoming messages
@@ -20,11 +21,11 @@ func (node *Node) handleIncomingMessage() {
 		// Process the message based on its type
 		switch msg.Type {
 		case message.JOINREQ:
-			node.MembershipManager.HandleJoinRequest(msg)
+			node.handleJoinRequest(msg)
 		case message.JOINRESP:
-			node.MembershipManager.HandleJoinResponse(msg)
+			node.handleJoinResponse(msg)
 		case message.HEARTBEAT:
-			node.MembershipManager.HandleHeartbeat(msg)
+			node.handleHeartbeatMsg(msg)
 		case message.NEWTRANSACTION:
 			node.handleNewTransactionMsg(msg)
 		case message.NEWBLOCK:
@@ -39,6 +40,39 @@ func (node *Node) handleIncomingMessage() {
 	}
 }
 
+// handleJoinRequest handles a JOINREQ message
+func (node *Node) handleJoinRequest(msg *message.Message) {
+	requester := msg.Sender
+	node.MembershipManager.HandleJoinRequest(requester)
+}
+
+// handleJoinResponse handles a JOINRESP message
+func (node *Node) handleJoinResponse(msg *message.Message) {
+	// Deserialize the member list from the payload
+	memberList, err := membership.DeserializeMemberList(msg.Payload)
+	if err != nil {
+		log.Printf("Failed to deserialize member list: %v\n", err)
+		return
+	}
+
+	// Update the member list
+	node.MembershipManager.HandleJoinResponse(memberList)
+}
+
+// handleHeartbeatMsg handles a heartbeat message
+func (node *Node) handleHeartbeatMsg(msg *message.Message) {
+	// Deserialize the member list from the payload
+	memberList, err := membership.DeserializeMemberList(msg.Payload)
+	if err != nil {
+		log.Printf("Failed to deserialize member list: %v\n", err)
+		return
+	}
+
+	// Update the member list
+	node.MembershipManager.HandleHeartbeat(memberList)
+}
+
+// handleNewTransactionMsg handles a new transaction message
 func (node *Node) handleNewTransactionMsg(msg *message.Message) {
 	// Gossip the transaction
 	node.GossipManager.Gossip(msg)
