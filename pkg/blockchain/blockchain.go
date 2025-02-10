@@ -86,6 +86,22 @@ func (bc *Blockchain) CalculateCumulativePoW() int {
 	return cumulativePoW
 }
 
+// calculateUTXOs calculates the UTXOs for an address
+func (bc *Blockchain) calculateUTXOs(address string) float64 {
+	utxos := 0.0
+	for _, b := range bc.Blocks {
+		for _, tx := range b.Transactions {
+			if tx.Sender == address {
+				utxos -= tx.Amount + tx.Fee
+			}
+			if tx.Recipient == address {
+				utxos += tx.Amount
+			}
+		}
+	}
+	return utxos
+}
+
 // Serialize serializes the blockchain to a JSON string
 func (bc *Blockchain) Serialize() (string, error) {
 	bc.mutex.RLock()
