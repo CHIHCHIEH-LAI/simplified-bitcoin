@@ -143,13 +143,13 @@ func (node *Node) Close() {
 	node.Miner.Close()
 }
 
-func (node *Node) AskForBlockchain(address string) {
-	msg := message.NewMessage(message.BLOCKCHAINREQ, node.Address, address, "")
+func (node *Node) AskForBlockchain(IPAddress string) {
+	msg := message.NewMessage(message.BLOCKCHAINREQ, node.IPAddress, IPAddress, "")
 	node.Transceiver.Transmit(msg)
 }
 
-func (node *Node) ShareBlockchain(address string) {
+func (node *Node) ShareBlockchain(IPAddress string) {
 	payload, _ := node.Blockchain.Serialize()
-	msg := message.NewMessage(message.BLOCKCHAINRESP, node.Address, address, payload)
+	msg := message.NewMessage(message.BLOCKCHAINRESP, node.IPAddress, IPAddress, payload)
 	node.Transceiver.Transmit(msg)
 }
