@@ -2,12 +2,10 @@ package mempool
 
 import (
 	"fmt"
-	"log"
 	"sync"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/block"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/transaction"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/message"
 )
 
 type Mempool struct {
@@ -21,25 +19,6 @@ func NewMempool() *Mempool {
 		Transactions: make(map[string]*transaction.Transaction),
 		Mutex:        &sync.RWMutex{},
 	}
-}
-
-// HandlenewTransaction handlkles a new transaction message
-func (mp *Mempool) HandleNewTransaction(msg *message.Message) {
-	// Deserialize the transaction
-	tx, err := transaction.DeserializeTransaction(msg.Payload)
-	if err != nil {
-		log.Printf("Failed to deserialize transaction: %v\n", err)
-		return
-	}
-
-	// Validate the transaction
-	if err := tx.Validate(); err != nil {
-		log.Printf("Invalid transaction: %v\n", err)
-		return
-	}
-
-	// Add the transaction to the pool
-	mp.AddTransaction(tx)
 }
 
 // AddTransaction adds a transaction to the pool

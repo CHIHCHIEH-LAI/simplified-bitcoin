@@ -5,6 +5,7 @@ import (
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/block"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/transaction"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/message"
 )
 
@@ -25,8 +26,7 @@ func (node *Node) handleIncomingMessage() {
 		case message.HEARTBEAT:
 			node.MembershipManager.HandleHeartbeat(msg)
 		case message.NEWTRANSACTION:
-			node.GossipManager.Gossip(msg)
-			node.Mempool.HandleNewTransaction(msg)
+			node.handleNewTransactionMsg(msg)
 		case message.NEWBLOCK:
 			node.handleNewBlockMsg(msg)
 		case message.BLOCKCHAINREQ:
@@ -37,6 +37,27 @@ func (node *Node) handleIncomingMessage() {
 			log.Printf("Unknown message type: %s\n", msg.Type)
 		}
 	}
+}
+
+func (node *Node) handleNewTransactionMsg(msg *message.Message) {
+	// Gossip the transaction
+	node.GossipManager.Gossip(msg)
+
+	// Deserialize the transaction
+	tx, err := transaction.DeserializeTransaction(msg.Payload)
+	if err != nil {
+		log.Printf("Failed to deserialize transaction: %v\n", err)
+		return
+	}
+
+	// Validate the transaction
+	if err := tx.Validate(); err != nil {
+		log.Printf("Invalid transaction: %v\n", err)
+		return
+	}
+
+	// Add the transaction to the pool
+	node.Mempool.AddTransaction(tx)
 }
 
 // handleNewBlockMsg handles a new block message
