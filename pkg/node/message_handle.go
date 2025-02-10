@@ -85,7 +85,7 @@ func (node *Node) handleNewTransactionMsg(msg *message.Message) {
 	}
 
 	// Validate the transaction
-	if err := tx.Validate(); err != nil {
+	if err := node.Blockchain.ValidateTransaction(tx); err != nil {
 		log.Printf("Invalid transaction: %v\n", err)
 		return
 	}

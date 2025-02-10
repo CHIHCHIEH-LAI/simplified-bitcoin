@@ -31,14 +31,14 @@ func NewBlockchain(mempool *mempool.Mempool) *Blockchain {
 }
 
 // NewBlock creates a new block with the given transactions
-func (bc *Blockchain) NewBlock(transactions []*transaction.Transaction, miner string) *block.Block {
+func (bc *Blockchain) NewBlock(transactions []*transaction.Transaction, miner string, total_fees float64) *block.Block {
 	bc.mutex.RLock()
 	defer bc.mutex.RUnlock()
 
 	prevHash := bc.GetLatestBlock().BlockID
-	reward := bc.CalculateReward()
+	amount := bc.CalculateReward() + total_fees
 	difficulty := bc.CalculateDifficulty()
-	return block.NewBlock(prevHash, transactions, miner, reward, difficulty)
+	return block.NewBlock(prevHash, transactions, miner, amount, difficulty)
 }
 
 // AddBlock adds a new block to the blockchain
@@ -69,7 +69,7 @@ func (bc *Blockchain) GetLatestBlock() *block.Block {
 
 // CalculateReward calculates the reward for the miner
 func (bc *Blockchain) CalculateReward() float64 {
-	return bc.BaseReward / float64(len(bc.Blocks))
+	return bc.BaseReward
 }
 
 // CalculateDifficulty calculates the difficulty for the miner
@@ -84,6 +84,22 @@ func (bc *Blockchain) CalculateCumulativePoW() int {
 		cumulativePoW += b.Difficulty
 	}
 	return cumulativePoW
+}
+
+// calculateUTXOs calculates the UTXOs for an address
+func (bc *Blockchain) calculateUTXOs(address string) float64 {
+	utxos := 0.0
+	for _, b := range bc.Blocks {
+		for _, tx := range b.Transactions {
+			if tx.Sender == address {
+				utxos -= tx.Amount + tx.Fee
+			}
+			if tx.Recipient == address {
+				utxos += tx.Amount
+			}
+		}
+	}
+	return utxos
 }
 
 // Serialize serializes the blockchain to a JSON string
