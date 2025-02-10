@@ -15,7 +15,7 @@ func (bc *Blockchain) Validate() error {
 	}
 
 	// Validate the blocks
-	for _, b := range bc.Blocks {
+	for _, b := range bc.Blocks[1:] {
 		if err := bc.ValidateBlock(b); err != nil {
 			return fmt.Errorf("invalid block: %s", b.BlockID)
 		}
