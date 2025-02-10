@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/block"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/transaction"
 )
 
 // Validate validates the blockchain
@@ -80,6 +81,36 @@ func (bc *Blockchain) validateReward(b *block.Block) error {
 	coinbaseTx := b.Transactions[0]
 	if coinbaseTx.Amount != reward {
 		return fmt.Errorf("invalid reward: %f", coinbaseTx.Amount)
+	}
+
+	return nil
+}
+
+func (bc *Blockchain) ValidateTransaction(tx *transaction.Transaction) error {
+	bc.mutex.RLock()
+	defer bc.mutex.RUnlock()
+
+	// Validate the transaction
+	if err := tx.Validate(); err != nil {
+		return err
+	}
+
+	// Validate the unspent transaction outputs
+	if err := bc.validateUTXOs(tx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateUTXOs validates the unspent transaction outputs
+func (bc *Blockchain) validateUTXOs(tx *transaction.Transaction) error {
+	// Get the unspent transaction outputs
+	utxos := bc.calculateUTXOs(tx.Sender)
+
+	// Validate the sender's balance
+	if utxos < tx.Amount+tx.Fee {
+		return fmt.Errorf("insufficient balance: %f", utxos)
 	}
 
 	return nil
