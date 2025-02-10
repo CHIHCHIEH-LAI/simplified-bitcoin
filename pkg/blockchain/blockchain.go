@@ -69,7 +69,7 @@ func (bc *Blockchain) GetLatestBlock() *block.Block {
 
 // CalculateReward calculates the reward for the miner
 func (bc *Blockchain) CalculateReward() float64 {
-	return bc.BaseReward / float64(len(bc.Blocks))
+	return bc.BaseReward
 }
 
 // CalculateDifficulty calculates the difficulty for the miner
