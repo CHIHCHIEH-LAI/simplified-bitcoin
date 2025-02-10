@@ -36,9 +36,9 @@ func (bc *Blockchain) NewBlock(transactions []*transaction.Transaction, miner st
 	defer bc.mutex.RUnlock()
 
 	prevHash := bc.GetLatestBlock().BlockID
-	reward := bc.CalculateReward()
+	amount := bc.CalculateReward() + total_fees
 	difficulty := bc.CalculateDifficulty()
-	return block.NewBlock(prevHash, transactions, miner, reward, difficulty)
+	return block.NewBlock(prevHash, transactions, miner, amount, difficulty)
 }
 
 // AddBlock adds a new block to the blockchain
