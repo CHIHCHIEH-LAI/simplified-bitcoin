@@ -132,20 +132,20 @@ func (bc *Blockchain) Print() {
 	fmt.Print("\n🔗 Blockchain\n")
 
 	for i, blk := range bc.Blocks {
-		fmt.Printf("\n🟦 Block %d - ID: %s\n", i, blk.BlockID[:10])
-		fmt.Printf("├── PrevHash: %s\n", blk.PrevHash[:10])
-		fmt.Printf("├── MerkleRoot: %s\n", blk.MerkleRoot[:10])
+		fmt.Printf("\n🟦 Block %d - ID: %s\n", i, blk.BlockID)
+		fmt.Printf("├── PrevHash: %s\n", blk.PrevHash)
+		fmt.Printf("├── MerkleRoot: %s\n", blk.MerkleRoot)
 		fmt.Printf("├── Timestamp: %d\n", blk.Timestamp)
 		fmt.Printf("├── Nonce: %d\n", blk.Nonce)
 		fmt.Printf("└── Transactions (%d):\n", len(blk.Transactions))
 
 		for _, tx := range blk.Transactions {
-			fmt.Printf("    ├── ID: %s\n", tx.TransactionID[:10])
-			fmt.Printf("    ├── Sender: %s\n", tx.Sender[:10])
-			fmt.Printf("    ├── Recipient: %s\n", tx.Recipient[:10])
+			fmt.Printf("    ├── ID: %s\n", tx.TransactionID)
+			fmt.Printf("    ├── Sender: %s\n", tx.Sender)
+			fmt.Printf("    ├── Recipient: %s\n", tx.Recipient)
 			fmt.Printf("    ├── Amount: %.2f\n", tx.Amount)
 			fmt.Printf("    ├── Fee: %.2f\n", tx.Fee)
-			fmt.Printf("    └── Signature: %s\n", tx.Signature[:10])
+			fmt.Printf("    └── Signature: %s\n", tx.Signature)
 		}
 		fmt.Println()
 	}
