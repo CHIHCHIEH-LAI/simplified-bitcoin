@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/block"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/transaction"
@@ -16,6 +17,7 @@ type Blockchain struct {
 	mutex         *sync.RWMutex    // Mutex to protect the blockchain
 	CumulativePoW int              `json:"cumulativePoW"` // Tracks total proof-of-work (sum of difficulties)
 	Mempool       *mempool.Mempool // Reference to the mempool
+	StopRunning   chan bool        // Channel to stop the blockchain
 }
 
 // NewBlockchain creates a new blockchain with the genesis block
@@ -27,7 +29,26 @@ func NewBlockchain(mempool *mempool.Mempool) *Blockchain {
 		mutex:         &sync.RWMutex{},
 		CumulativePoW: genesisBlock.Difficulty,
 		Mempool:       mempool,
+		StopRunning:   make(chan bool, 1),
 	}
+}
+
+// Run starts the blockchain loop
+func (bc *Blockchain) Run() {
+	for {
+		select {
+		case <-bc.StopRunning:
+			return
+		default:
+			bc.Print()
+			time.Sleep(60 * time.Second)
+		}
+	}
+}
+
+// Close stops the blockchain
+func (bc *Blockchain) Close() {
+	bc.StopRunning <- true
 }
 
 // NewBlock creates a new block with the given transactions

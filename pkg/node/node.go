@@ -76,6 +76,9 @@ func (node *Node) Run(bootstrapNodeAddr string) error {
 	// Run the miner
 	go node.Miner.Run()
 
+	// Run the blockchain
+	go node.Blockchain.Run()
+
 	return nil
 }
 
@@ -89,4 +92,7 @@ func (node *Node) Close() {
 
 	// Close the miner
 	node.Miner.Close()
+
+	// Close the blockchain
+	node.Blockchain.Close()
 }
