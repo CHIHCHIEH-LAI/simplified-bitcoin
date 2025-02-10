@@ -62,7 +62,16 @@ func (node *Node) handleNewTransactionMsg(msg *message.Message) {
 
 // handleNewBlockMsg handles a new block message
 func (node *Node) handleNewBlockMsg(msg *message.Message) {
-	block, _ := block.DeserializeBlock(msg.Payload)
+	// Gossip the block
+	node.GossipManager.Gossip(msg)
+
+	// Deserialize the block
+	block, err := block.DeserializeBlock(msg.Payload)
+	if err != nil {
+		log.Printf("Failed to deserialize block: %v\n", err)
+		return
+	}
+
 	if err := node.Blockchain.ValidateBlock(block); err != nil {
 		log.Printf("Invalid block: %s\n", err)
 		msg := message.NewMessage(message.BLOCKCHAINREQ, node.IPAddress, msg.Sender, "")
