@@ -116,7 +116,7 @@ func (miner *Miner) PerformProofOfWork(block *block.Block) *block.Block {
 
 // BroadcastBlock sends the newly mined block to the network
 func (miner *Miner) BroadcastBlock(b *block.Block) {
-	msg := block.NewMinedBlockMessage(b)
+	msg := block.NewMinedBlockMessage(b, miner.GossipManager.IPAddress)
 	miner.GossipManager.Gossip(msg)
 	log.Printf("Broadcasted new block: %s", b.BlockID)
 }
