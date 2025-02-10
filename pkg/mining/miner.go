@@ -66,8 +66,13 @@ func (miner *Miner) Run() {
 				continue
 			}
 
+			total_fees := 0.0
+			for _, tx := range transactions {
+				total_fees += tx.Fee
+			}
+
 			// Create a new block
-			newBlock := miner.Blockchain.NewBlock(transactions, miner.Address)
+			newBlock := miner.Blockchain.NewBlock(transactions, miner.Address, total_fees)
 
 			// Perform Proof of Work
 			minedBlock := miner.PerformProofOfWork(newBlock)
