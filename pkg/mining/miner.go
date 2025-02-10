@@ -84,6 +84,9 @@ func (miner *Miner) Run() {
 			// Add Mined Block to Blockchain
 			miner.Blockchain.AddBlock(minedBlock)
 
+			// Print the blockchain
+			miner.Blockchain.Print()
+
 			// Broadcast the Mined Block
 			miner.BroadcastBlock(minedBlock)
 
