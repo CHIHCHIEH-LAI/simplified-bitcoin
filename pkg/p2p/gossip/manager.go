@@ -47,9 +47,6 @@ func (mgr *GossipManager) Gossip(msg *message.Message) {
 		return
 	}
 
-	// Set the sender of the message
-	msg.Sender = mgr.IPAddress
-
 	// Select N random members to send the message to
 	n_members := mgr.MembershipManager.GetNumberOfMembers()
 	n_targetMembers := utils.ISqrt(n_members)
