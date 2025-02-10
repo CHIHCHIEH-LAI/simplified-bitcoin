@@ -91,11 +91,6 @@ func (tx *Transaction) validateTimestamp() error {
 		return fmt.Errorf("timestamp cannot be in the future")
 	}
 
-	// Check if the timestamp is too old
-	if currentTime-tx.Timestamp > 60 {
-		return fmt.Errorf("timestamp is too old")
-	}
-
 	return nil
 }
 
