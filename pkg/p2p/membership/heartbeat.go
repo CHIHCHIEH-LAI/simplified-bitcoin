@@ -19,13 +19,7 @@ func NewHEARTBEATMessage(sender string, payload string) *message.Message {
 }
 
 // HandleHeartbeat processes a HEARTBEAT message
-func (mgr *MembershipManager) HandleHeartbeat(msg *message.Message) {
-	// Deserialize the member list from the payload
-	memberList, err := DeserializeMemberList(msg.Payload)
-	if err != nil {
-		log.Printf("Failed to deserialize member list: %v\n", err)
-		return
-	}
+func (mgr *MembershipManager) HandleHeartbeat(memberList *MemberList) {
 
 	// Update the member list
 	mgr.MemberList.UpdateMemberList(memberList, mgr.IPAddress)
