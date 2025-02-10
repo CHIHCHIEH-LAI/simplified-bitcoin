@@ -1,27 +1,32 @@
 package blockchain
 
 import (
+	"encoding/json"
+	"fmt"
 	"sync"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/block"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/transaction"
+	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/mining/mempool"
 )
 
 type Blockchain struct {
 	BaseReward    float64
-	Blocks        []*block.Block `json:"blocks"` // Blocks in the blockchain
-	mutex         *sync.RWMutex  // Mutex to protect the blockchain
-	CumulativePoW int            `json:"cumulativePoW"` // Tracks total proof-of-work (sum of difficulties)
+	Blocks        []*block.Block   `json:"blocks"` // Blocks in the blockchain
+	mutex         *sync.RWMutex    // Mutex to protect the blockchain
+	CumulativePoW int              `json:"cumulativePoW"` // Tracks total proof-of-work (sum of difficulties)
+	Mempool       *mempool.Mempool // Reference to the mempool
 }
 
 // NewBlockchain creates a new blockchain with the genesis block
-func NewBlockchain() *Blockchain {
+func NewBlockchain(mempool *mempool.Mempool) *Blockchain {
 	genesisBlock := block.NewGenesisBlock()
 	return &Blockchain{
 		BaseReward:    1000.0,
 		Blocks:        []*block.Block{genesisBlock},
 		mutex:         &sync.RWMutex{},
 		CumulativePoW: genesisBlock.Difficulty,
+		Mempool:       mempool,
 	}
 }
 
@@ -49,6 +54,11 @@ func (bc *Blockchain) AddBlock(block *block.Block) error {
 	bc.Blocks = append(bc.Blocks, block)
 	bc.CumulativePoW += block.Difficulty
 
+	// Remove transactions in the block from the mempool
+	for _, tx := range block.Transactions {
+		bc.Mempool.RemoveTransaction(tx.TransactionID)
+	}
+
 	return nil
 }
 
@@ -64,15 +74,36 @@ func (bc *Blockchain) CalculateReward() float64 {
 
 // CalculateDifficulty calculates the difficulty for the miner
 func (bc *Blockchain) CalculateDifficulty() int {
-	return 10
+	return 7
 }
 
-// printBlockchain prints the blockchain
-func (bc *Blockchain) PrintBlockchain() {
+// CalculateCumulativePoW calculates the cumulative proof-of-work
+func (bc *Blockchain) CalculateCumulativePoW() int {
+	cumulativePoW := 0
+	for _, b := range bc.Blocks {
+		cumulativePoW += b.Difficulty
+	}
+	return cumulativePoW
+}
+
+// Serialize serializes the blockchain to a JSON string
+func (bc *Blockchain) Serialize() (string, error) {
 	bc.mutex.RLock()
 	defer bc.mutex.RUnlock()
 
-	for _, block := range bc.Blocks {
-		block.PrintBlock()
+	data, err := json.Marshal(bc)
+	if err != nil {
+		return "", fmt.Errorf("failed to serialize block: %v", err)
 	}
+	return string(data), nil
+}
+
+// DeserializeBlockchain deserializes a JSON string to a blockchain
+func DeserializeBlockchain(data string) (*Blockchain, error) {
+	var bc Blockchain
+	err := json.Unmarshal([]byte(data), &bc)
+	if err != nil {
+		return nil, fmt.Errorf("failed to deserialize blockchain: %v", err)
+	}
+	return &bc, nil
 }
