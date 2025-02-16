@@ -3,6 +3,7 @@ package blockchain
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -52,14 +53,14 @@ func (bc *Blockchain) Close() {
 }
 
 // NewBlock creates a new block with the given transactions
-func (bc *Blockchain) NewBlock(transactions []*transaction.Transaction, miner string, total_fees float64) *block.Block {
+func (bc *Blockchain) NewBlock(transactions []*transaction.Transaction, miner string) *block.Block {
 	bc.mutex.RLock()
 	defer bc.mutex.RUnlock()
 
 	prevHash := bc.GetLatestBlock().BlockID
-	amount := bc.CalculateReward() + total_fees
+	reward := bc.CalculateReward(transactions)
 	difficulty := bc.CalculateDifficulty()
-	return block.NewBlock(prevHash, transactions, miner, amount, difficulty)
+	return block.NewBlock(prevHash, transactions, miner, reward, difficulty)
 }
 
 // AddBlock adds a new block to the blockchain
@@ -69,6 +70,7 @@ func (bc *Blockchain) AddBlock(block *block.Block) error {
 
 	// Validate the block
 	if err := bc.ValidateBlock(block); err != nil {
+		log.Println("Block validation failed:", err)
 		return err
 	}
 
@@ -89,13 +91,18 @@ func (bc *Blockchain) GetLatestBlock() *block.Block {
 }
 
 // CalculateReward calculates the reward for the miner
-func (bc *Blockchain) CalculateReward() float64 {
-	return bc.BaseReward
+func (bc *Blockchain) CalculateReward(transactions []*transaction.Transaction) float64 {
+	total_fee := 0.0
+	for _, tx := range transactions {
+		total_fee += tx.Fee
+	}
+
+	return bc.BaseReward + total_fee
 }
 
 // CalculateDifficulty calculates the difficulty for the miner
 func (bc *Blockchain) CalculateDifficulty() int {
-	return 7
+	return 5
 }
 
 // CalculateCumulativePoW calculates the cumulative proof-of-work
@@ -150,7 +157,7 @@ func (bc *Blockchain) Print() {
 	bc.mutex.RLock()
 	defer bc.mutex.RUnlock()
 
-	fmt.Print("\n🔗 Blockchain\n")
+	fmt.Printf("\n🔗 Blockchain with %d blocks\n", len(bc.Blocks))
 
 	for i, blk := range bc.Blocks {
 		fmt.Printf("\n🟦 Block %d - ID: %s\n", i, blk.BlockID)

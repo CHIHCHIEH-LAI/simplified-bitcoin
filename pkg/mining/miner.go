@@ -66,13 +66,8 @@ func (miner *Miner) Run() {
 				continue
 			}
 
-			total_fees := 0.0
-			for _, tx := range transactions {
-				total_fees += tx.Fee
-			}
-
 			// Create a new block
-			newBlock := miner.Blockchain.NewBlock(transactions, miner.Address, total_fees)
+			newBlock := miner.Blockchain.NewBlock(transactions, miner.Address)
 
 			// Perform Proof of Work
 			minedBlock := miner.PerformProofOfWork(newBlock)
@@ -82,7 +77,11 @@ func (miner *Miner) Run() {
 			}
 
 			// Add Mined Block to Blockchain
-			miner.Blockchain.AddBlock(minedBlock)
+			err := miner.Blockchain.AddBlock(minedBlock)
+			if err != nil {
+				log.Println("Failed to add block to blockchain:", err)
+				continue
+			}
 
 			// Broadcast the Mined Block
 			miner.BroadcastBlock(minedBlock)
