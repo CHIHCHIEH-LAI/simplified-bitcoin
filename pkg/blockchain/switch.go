@@ -58,7 +58,7 @@ func (bc *Blockchain) FindLastCommonBlock(fork *Blockchain) *block.Block {
 // RemoveDivergingBlocks removes blocks that diverge from the last common block
 func (bc *Blockchain) RemoveDivergingBlocks(lca *block.Block) {
 	for i := len(bc.Blocks) - 1; i >= 0; i-- {
-		if bc.Blocks[i].BlockID == lca.BlockID {
+		if lca != nil && bc.Blocks[i].BlockID == lca.BlockID {
 			break
 		}
 
@@ -75,7 +75,7 @@ func (bc *Blockchain) RemoveDivergingBlocks(lca *block.Block) {
 // AppendBlocks appends new blocks to the blockchain
 func (bc *Blockchain) AppendForkBlocks(blocks []*block.Block, lca *block.Block) {
 	for i := 0; i < len(blocks); i++ {
-		if blocks[i].BlockID != lca.BlockID {
+		if lca != nil && blocks[i].BlockID != lca.BlockID {
 			continue
 		}
 
