@@ -18,7 +18,7 @@ type Blockchain struct {
 	mutex         *sync.RWMutex    // Mutex to protect the blockchain
 	CumulativePoW int              `json:"cumulativePoW"` // Tracks total proof-of-work (sum of difficulties)
 	Mempool       *mempool.Mempool // Reference to the mempool
-	StopRunning   chan bool        // Channel to stop the blockchain
+	StopRunning   chan bool        `json:"-"` // Channel to stop the blockchain
 }
 
 // NewBlockchain creates a new blockchain with the genesis block
@@ -69,7 +69,7 @@ func (bc *Blockchain) AddBlock(block *block.Block) error {
 	defer bc.mutex.Unlock()
 
 	// Validate the block
-	if err := bc.ValidateBlock(block); err != nil {
+	if err := bc.ValidateNewBlock(block); err != nil {
 		log.Println("Block validation failed:", err)
 		return err
 	}
