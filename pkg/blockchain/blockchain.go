@@ -14,11 +14,11 @@ import (
 
 type Blockchain struct {
 	BaseReward    float64
-	Blocks        []*block.Block   `json:"blocks"` // Blocks in the blockchain
-	mutex         *sync.RWMutex    // Mutex to protect the blockchain
+	Blocks        []*block.Block   `json:"blocks"`        // Blocks in the blockchain
+	mutex         *sync.RWMutex    `json:"-"`             // Mutex to protect the blockchain
 	CumulativePoW int              `json:"cumulativePoW"` // Tracks total proof-of-work (sum of difficulties)
-	Mempool       *mempool.Mempool // Reference to the mempool
-	StopRunning   chan bool        `json:"-"` // Channel to stop the blockchain
+	Mempool       *mempool.Mempool `json:"-"`             // Reference to the mempool
+	StopRunning   chan bool        `json:"-"`             // Channel to stop the blockchain
 }
 
 // NewBlockchain creates a new blockchain with the genesis block
