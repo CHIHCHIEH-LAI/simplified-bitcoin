@@ -106,7 +106,7 @@ func (node *Node) handleNewBlockMsg(msg *message.Message) {
 		return
 	}
 
-	if err := node.Blockchain.ValidateBlock(block); err != nil {
+	if err := node.Blockchain.ValidateNewBlock(block); err != nil {
 		log.Printf("Invalid block: %s\n", err)
 		msg := message.NewMessage(message.BLOCKCHAINREQ, node.IPAddress, msg.Sender, "")
 		node.Transceiver.Transmit(msg)
@@ -119,17 +119,28 @@ func (node *Node) handleNewBlockMsg(msg *message.Message) {
 
 // handleBlockChainRequest handles a blockchain request message
 func (node *Node) handleBlockChainRequest(msg *message.Message) {
-	payload, _ := node.Blockchain.Serialize()
+	payload, err := node.Blockchain.Serialize()
+	if err != nil {
+		log.Printf("Failed to serialize blockchain: %v\n", err)
+		return
+	}
+
 	newMsg := message.NewMessage(message.BLOCKCHAINRESP, node.IPAddress, msg.Sender, payload)
 	node.Transceiver.Transmit(newMsg)
 }
 
 // handleBlockchainResponse handles a blockchain response message
 func (node *Node) handleBlockchainResponse(msg *message.Message) {
-	blockchain, _ := blockchain.DeserializeBlockchain(msg.Payload)
+	blockchain, err := blockchain.DeserializeBlockchain(msg.Payload)
+	if err != nil {
+		log.Printf("Failed to deserialize blockchain: %v\n", err)
+		return
+	}
+
 	if err := node.Blockchain.ShouldSwitchChain(blockchain); err != nil {
 		log.Printf("Invalid blockchain: %s\n", err)
 	} else {
+		log.Printf("Switching to a new blockchain\n")
 		node.Miner.Stop()
 		node.Blockchain.SwitchChain(blockchain)
 		go node.Miner.Run()
