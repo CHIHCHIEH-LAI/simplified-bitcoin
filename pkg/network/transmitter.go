@@ -37,7 +37,6 @@ func (t *Transmitter) SendMessage(msg *message.Message) {
 	conn, err := t.establishConnection(msg.Receipient)
 	if err != nil {
 		log.Printf("failed to establish connection: %v\n", err)
-		conn.Close()
 		return
 	}
 
