@@ -16,7 +16,7 @@ func (bc *Blockchain) Validate() error {
 
 	// Validate the blocks
 	for i, b := range bc.Blocks[1:] {
-		if err := bc.ValidateBlock(b, i); err != nil {
+		if err := bc.ValidateBlock(b, i+1); err != nil {
 			return fmt.Errorf("invalid block: %v", err)
 		}
 	}
@@ -36,7 +36,7 @@ func (bc *Blockchain) validateCumulativePoW() error {
 // ValidateNewBlock validates the new block
 func (bc *Blockchain) ValidateNewBlock(b *block.Block) error {
 	// Validate the previous hash
-	height := len(bc.Blocks) - 1
+	height := len(bc.Blocks)
 	if err := bc.validatePrevHash(b, height); err != nil {
 		return err
 	}
@@ -90,11 +90,11 @@ func (bc *Blockchain) validatePrevHash(b *block.Block, height int) error {
 		return nil
 	}
 
-	if height >= len(bc.Blocks) {
+	if height > len(bc.Blocks) {
 		return fmt.Errorf("invalid height: %d", height)
 	}
 
-	prevBlock := bc.Blocks[height]
+	prevBlock := bc.Blocks[height-1]
 	if b.PrevHash != prevBlock.BlockID {
 		return fmt.Errorf("invalid previous hash: %s", b.PrevHash)
 	}
