@@ -79,8 +79,13 @@ func (bc *Blockchain) AppendForkBlocks(blocks []*block.Block, lca *block.Block) 
 			continue
 		}
 
+		start := i + 1
+		if lca == nil {
+			start = 0
+		}
+
 		// Append the rest of the blocks
-		for j := i + 1; j < len(blocks); j++ {
+		for j := start; j < len(blocks); j++ {
 			bc.Blocks = append(bc.Blocks, blocks[j])
 
 			// Remove transactions from the mempool
