@@ -2,7 +2,6 @@ package node
 
 import (
 	"log"
-	"time"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/block"
@@ -110,12 +109,9 @@ func (node *Node) handleNewBlockMsg(msg *message.Message) {
 		msg := message.NewMessage(message.BLOCKCHAINREQ, node.IPAddress, msg.Sender, "")
 		node.Transceiver.Transmit(msg)
 	} else {
-		// Gossip the block
 		node.GossipManager.Gossip(msg)
-
-		node.Miner.Stop()
 		node.Blockchain.AddBlock(block)
-		go node.Miner.Run()
+		node.Miner.StopPoW()
 	}
 }
 
@@ -143,9 +139,7 @@ func (node *Node) handleBlockchainResponse(msg *message.Message) {
 		log.Printf("Invalid blockchain: %s\n", err)
 	} else {
 		log.Printf("Switching to a new blockchain\n")
-		node.Miner.Stop()
 		node.Blockchain.SwitchChain(blockchain)
-		time.Sleep(5 * time.Second)
-		go node.Miner.Run()
+		node.Miner.StopPoW()
 	}
 }
