@@ -2,7 +2,6 @@ package node
 
 import (
 	"log"
-	"time"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/block"
@@ -75,8 +74,6 @@ func (node *Node) handleHeartbeatMsg(msg *message.Message) {
 
 // handleNewTransactionMsg handles a new transaction message
 func (node *Node) handleNewTransactionMsg(msg *message.Message) {
-	// Gossip the transaction
-	node.GossipManager.Gossip(msg)
 
 	// Deserialize the transaction
 	tx, err := transaction.DeserializeTransaction(msg.Payload)
@@ -91,15 +88,15 @@ func (node *Node) handleNewTransactionMsg(msg *message.Message) {
 		return
 	}
 
+	// Gossip the transaction
+	node.GossipManager.Gossip(msg)
+
 	// Add the transaction to the pool
 	node.Mempool.AddTransaction(tx)
 }
 
 // handleNewBlockMsg handles a new block message
 func (node *Node) handleNewBlockMsg(msg *message.Message) {
-	// Gossip the block
-	node.GossipManager.Gossip(msg)
-
 	// Deserialize the block
 	block, err := block.DeserializeBlock(msg.Payload)
 	if err != nil {
@@ -112,9 +109,9 @@ func (node *Node) handleNewBlockMsg(msg *message.Message) {
 		msg := message.NewMessage(message.BLOCKCHAINREQ, node.IPAddress, msg.Sender, "")
 		node.Transceiver.Transmit(msg)
 	} else {
-		node.Miner.Stop()
+		node.GossipManager.Gossip(msg)
 		node.Blockchain.AddBlock(block)
-		go node.Miner.Run()
+		node.Miner.StopPoW()
 	}
 }
 
@@ -142,9 +139,7 @@ func (node *Node) handleBlockchainResponse(msg *message.Message) {
 		log.Printf("Invalid blockchain: %s\n", err)
 	} else {
 		log.Printf("Switching to a new blockchain\n")
-		node.Miner.Stop()
 		node.Blockchain.SwitchChain(blockchain)
-		time.Sleep(5 * time.Second)
-		go node.Miner.Run()
+		node.Miner.StopPoW()
 	}
 }
