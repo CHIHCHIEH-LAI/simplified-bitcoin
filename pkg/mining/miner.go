@@ -3,7 +3,6 @@ package mining
 import (
 	"log"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain"
@@ -19,8 +18,7 @@ type Miner struct {
 	GossipManager *gossip.GossipManager  // Gossip manager reference
 	Mempool       *mempool.Mempool       // Mempool reference
 	StopMining    chan bool              // Channel to stop mining
-	MiningActive  bool                   // Indicates if mining is active
-	Mutex         *sync.Mutex            // Ensures safe concurrent mining operations
+	StopRunning   chan bool              // Channel to stop the miner
 }
 
 // NewMiner creates a new miner
@@ -37,25 +35,15 @@ func NewMiner(
 		GossipManager: gossipManager,
 		Mempool:       mempool,
 		StopMining:    make(chan bool, 1),
-		Mutex:         &sync.Mutex{},
+		StopRunning:   make(chan bool, 1),
 	}
 }
 
 // Run starts the mining loop
 func (miner *Miner) Run() {
-	// Prevent duplicate mining sessions
-	if miner.MiningActive {
-		log.Println("Mining is already running.")
-		return
-	}
-	miner.MiningActive = true
-	log.Println("Starting mining process...")
-
 	for {
 		select {
-		case <-miner.StopMining:
-			log.Println("Mining stopped.")
-			miner.MiningActive = false
+		case <-miner.StopRunning:
 			return
 		default:
 			// Get the top N rewarding transactions from the mempool
@@ -72,22 +60,26 @@ func (miner *Miner) Run() {
 			// Perform Proof of Work
 			minedBlock := miner.PerformProofOfWork(newBlock)
 			if minedBlock == nil {
-				log.Println("Mining was interrupted.")
-				return
+				log.Println("PoW was interrupted.")
+				continue
 			}
 
 			// Add Mined Block to Blockchain
-			miner.Blockchain.AddBlock(minedBlock)
+			err := miner.Blockchain.AddBlock(minedBlock)
+			if err != nil {
+				log.Println("Failed to add block to blockchain:", err)
+				continue
+			}
 
 			// Broadcast the Mined Block
 			miner.BroadcastBlock(minedBlock)
 
 			// Remove transactions from the mempool
 			miner.Mempool.RemoveTransactionsInBlock(minedBlock)
-
-			// Pause to allow network sync before restarting
-			time.Sleep(60 * time.Second)
 		}
+
+		// Pause to allow network sync before restarting
+		time.Sleep(60 * time.Second)
 	}
 }
 
@@ -116,25 +108,21 @@ func (miner *Miner) PerformProofOfWork(block *block.Block) *block.Block {
 
 // BroadcastBlock sends the newly mined block to the network
 func (miner *Miner) BroadcastBlock(b *block.Block) {
-	msg := block.NewMinedBlockMessage(b)
+	msg := block.NewMinedBlockMessage(b, miner.GossipManager.IPAddress)
 	miner.GossipManager.Gossip(msg)
 	log.Printf("Broadcasted new block: %s", b.BlockID)
 }
 
-// StopMining stops the current mining process
-func (miner *Miner) Stop() {
-	if !miner.MiningActive {
-		log.Println("Mining is already stopped.")
-		return
-	}
-
-	log.Println("Stopping mining process...")
+// StopPoW stops the proof of work process
+func (miner *Miner) StopPoW() {
+	log.Println("Stopping PoW process...")
 	miner.StopMining <- true
-	miner.MiningActive = false
 }
 
 // Close closes the miner
 func (miner *Miner) Close() {
-	miner.Stop()
+	miner.StopMining <- true
+	miner.StopRunning <- true
 	close(miner.StopMining)
+	close(miner.StopRunning)
 }

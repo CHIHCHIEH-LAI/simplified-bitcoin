@@ -1,11 +1,7 @@
 package node
 
 import (
-	"log"
-
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/block"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/message"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/mining"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/mining/mempool"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/network"
@@ -38,14 +34,14 @@ func NewNode(IPAddress, port, address string) (*Node, error) {
 	// Create a new membership manager
 	membershipManager := membership.NewMembershipManager(IPAddress, transceiver)
 
+	// Create a Mempool
+	mempool := mempool.NewMempool()
+
 	// Create a Blockchain
-	blockchain := blockchain.NewBlockchain()
+	blockchain := blockchain.NewBlockchain(mempool)
 
 	// Create a Gossip Manager
 	gossipManager := gossip.NewGossipManager(IPAddress, transceiver, membershipManager)
-
-	// Create a Mempool
-	mempool := mempool.NewMempool()
 
 	// Create a Miner
 	miner := mining.NewMiner(address, blockchain, gossipManager, mempool)
@@ -80,39 +76,10 @@ func (node *Node) Run(bootstrapNodeAddr string) error {
 	// Run the miner
 	go node.Miner.Run()
 
+	// Run the blockchain
+	go node.Blockchain.Run()
+
 	return nil
-}
-
-// HandleIncomingMessage processes incoming messages
-func (node *Node) handleIncomingMessage() {
-	for {
-		msg, ok := node.Transceiver.Receive()
-		if !ok {
-			continue // Skip iteration if no message
-		}
-
-		// Process the message based on its type
-		switch msg.Type {
-		case message.JOINREQ:
-			node.MembershipManager.HandleJoinRequest(msg)
-		case message.JOINRESP:
-			node.MembershipManager.HandleJoinResponse(msg)
-		case message.HEARTBEAT:
-			node.MembershipManager.HandleHeartbeat(msg)
-		case message.NEWTRANSACTION:
-			node.GossipManager.Gossip(msg)
-			node.Mempool.HandleNewTransaction(msg)
-		case message.NEWBLOCK:
-			node.GossipManager.Gossip(msg)
-			node.Miner.Stop()
-			block, _ := block.DeserializeBlock(msg.Payload)
-			node.Mempool.RemoveTransactionsInBlock(block)
-			node.Blockchain.AddBlock(block)
-			go node.Miner.Run()
-		default:
-			log.Printf("Unknown message type: %s\n", msg.Type)
-		}
-	}
 }
 
 // Close closes the P2P node
@@ -125,4 +92,7 @@ func (node *Node) Close() {
 
 	// Close the miner
 	node.Miner.Close()
+
+	// Close the blockchain
+	node.Blockchain.Close()
 }

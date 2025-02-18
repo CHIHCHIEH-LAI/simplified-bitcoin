@@ -57,8 +57,7 @@ func NewJOINRESPMessage(selfAddr, receipient, payload string) *message.Message {
 }
 
 // HandleJoinRequest processes a JOINREQ message
-func (mgr *MembershipManager) HandleJoinRequest(msg *message.Message) {
-	requester := msg.Sender
+func (mgr *MembershipManager) HandleJoinRequest(requester string) {
 
 	// Create a new member
 	member := NewMember(requester)
@@ -80,13 +79,9 @@ func (mgr *MembershipManager) HandleJoinRequest(msg *message.Message) {
 }
 
 // HandleJoinResponse processes a JOINRESP message
-func (mgr *MembershipManager) HandleJoinResponse(msg *message.Message) {
-	// Deserialize the member list from the payload
-	memberList, err := DeserializeMemberList(msg.Payload)
-	if err != nil {
-		log.Printf("Failed to deserialize member list: %v\n", err)
-		return
-	}
+func (mgr *MembershipManager) HandleJoinResponse(memberList *MemberList) {
+	mgr.MemberList.Mutex.Lock()
+	defer mgr.MemberList.Mutex.Unlock()
 
 	mgr.MemberList = memberList
 }

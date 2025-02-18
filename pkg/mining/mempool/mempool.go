@@ -2,12 +2,10 @@ package mempool
 
 import (
 	"fmt"
-	"log"
 	"sync"
 
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/block"
 	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/blockchain/transaction"
-	"github.com/CHIHCHIEH-LAI/simplified-bitcoin/pkg/message"
 )
 
 type Mempool struct {
@@ -23,27 +21,8 @@ func NewMempool() *Mempool {
 	}
 }
 
-// HandlenewTransaction handlkles a new transaction message
-func (mp *Mempool) HandleNewTransaction(msg *message.Message) {
-	// Deserialize the transaction
-	tx, err := transaction.DeserializeTransaction(msg.Payload)
-	if err != nil {
-		log.Printf("Failed to deserialize transaction: %v\n", err)
-		return
-	}
-
-	// Validate the transaction
-	if err := tx.Validate(); err != nil {
-		log.Printf("Invalid transaction: %v\n", err)
-		return
-	}
-
-	// Add the transaction to the pool
-	mp.addTransaction(tx)
-}
-
 // AddTransaction adds a transaction to the pool
-func (mp *Mempool) addTransaction(tx *transaction.Transaction) error {
+func (mp *Mempool) AddTransaction(tx *transaction.Transaction) error {
 	mp.Mutex.Lock()
 	defer mp.Mutex.Unlock()
 
@@ -60,12 +39,21 @@ func (mp *Mempool) RemoveTransactionsInBlock(block *block.Block) {
 	defer mp.Mutex.Unlock()
 
 	for _, tx := range block.Transactions {
-		mp.removeTransaction(tx.TransactionID)
+		mp.RemoveTransaction(tx.TransactionID)
+	}
+}
+
+func (mp *Mempool) RemoveTransactions(transactionIds []string) {
+	mp.Mutex.Lock()
+	defer mp.Mutex.Unlock()
+
+	for _, txID := range transactionIds {
+		mp.RemoveTransaction(txID)
 	}
 }
 
 // RemoveTransaction removes a transaction from the pool
-func (mp *Mempool) removeTransaction(txID string) error {
+func (mp *Mempool) RemoveTransaction(txID string) error {
 	if mp.Transactions[txID] == nil {
 		return fmt.Errorf("transaction with ID %s does not exist", txID)
 	}
