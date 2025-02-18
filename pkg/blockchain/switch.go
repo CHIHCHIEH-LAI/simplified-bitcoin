@@ -63,7 +63,7 @@ func (bc *Blockchain) RemoveDivergingBlocks(lca *block.Block) {
 		}
 
 		// Add transactions back to the mempool
-		for _, tx := range bc.Blocks[i].Transactions {
+		for _, tx := range bc.Blocks[i].Transactions[1:] {
 			bc.Mempool.AddTransaction(tx)
 		}
 
