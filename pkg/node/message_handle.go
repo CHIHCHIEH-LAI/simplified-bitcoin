@@ -75,8 +75,6 @@ func (node *Node) handleHeartbeatMsg(msg *message.Message) {
 
 // handleNewTransactionMsg handles a new transaction message
 func (node *Node) handleNewTransactionMsg(msg *message.Message) {
-	// Gossip the transaction
-	node.GossipManager.Gossip(msg)
 
 	// Deserialize the transaction
 	tx, err := transaction.DeserializeTransaction(msg.Payload)
@@ -91,15 +89,15 @@ func (node *Node) handleNewTransactionMsg(msg *message.Message) {
 		return
 	}
 
+	// Gossip the transaction
+	node.GossipManager.Gossip(msg)
+
 	// Add the transaction to the pool
 	node.Mempool.AddTransaction(tx)
 }
 
 // handleNewBlockMsg handles a new block message
 func (node *Node) handleNewBlockMsg(msg *message.Message) {
-	// Gossip the block
-	node.GossipManager.Gossip(msg)
-
 	// Deserialize the block
 	block, err := block.DeserializeBlock(msg.Payload)
 	if err != nil {
@@ -112,6 +110,9 @@ func (node *Node) handleNewBlockMsg(msg *message.Message) {
 		msg := message.NewMessage(message.BLOCKCHAINREQ, node.IPAddress, msg.Sender, "")
 		node.Transceiver.Transmit(msg)
 	} else {
+		// Gossip the block
+		node.GossipManager.Gossip(msg)
+
 		node.Miner.Stop()
 		node.Blockchain.AddBlock(block)
 		go node.Miner.Run()
